@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRBr — Simulado 1ª Fase 2024</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a1614;--paper:#f5f0e8;--cream:#ede7d9;--gold:#b8860b;--gold-l:#d4a017;--red:#8b1a1a;--green:#1a5c2a;--muted:#6b6358;--border:#c8bfb0;--card:#faf7f2;--shadow:rgba(26,22,20,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+.screen{display:none!important}.screen.active{display:block!important}
+#home.active{display:flex!important;flex-direction:column;align-items:center;justify-content:center}
+#complete.active{display:flex!important;flex-direction:column;align-items:center;justify-content:center}
+
+#topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;border-bottom:2px solid var(--gold)}
+.brand{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold-l);letter-spacing:.04em}
+.stats-row{display:flex;gap:20px;align-items:center}
+.stat-pill{display:flex;flex-direction:column;align-items:center;line-height:1.1}
+.stat-pill .val{font-size:.95rem;font-weight:700;color:var(--gold-l);font-family:'IBM Plex Mono',monospace}
+.stat-pill .lbl{font-size:.58rem;opacity:.6;text-transform:uppercase;letter-spacing:.08em}
+#menu-btn{background:none;border:1px solid rgba(255,255,255,.3);color:var(--paper);padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.82rem;font-family:inherit;transition:.2s}
+#menu-btn:hover{background:rgba(255,255,255,.15)}
+
+#pbar-wrap{position:fixed;top:56px;left:0;right:0;height:4px;z-index:99;background:rgba(0,0,0,.1)}
+#pbar{height:100%;background:var(--gold);width:0;transition:width .4s}
+
+/* SAVE INDICATOR */
+#save-dot{position:fixed;bottom:16px;right:16px;z-index:50;display:flex;align-items:center;gap:6px;background:var(--ink);color:var(--paper);padding:6px 12px;border-radius:20px;font-size:.72rem;opacity:0;transition:opacity .4s;pointer-events:none;border:1px solid var(--gold)}
+#save-dot.show{opacity:1}
+#save-dot-circle{width:7px;height:7px;border-radius:50%;background:var(--gold-l)}
+
+/* HOME */
+#home{min-height:100vh;padding:80px 24px 40px}
+.home-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5vw,3.2rem);line-height:1.1;text-align:center;margin-bottom:8px}
+.home-title em{color:var(--gold);font-style:italic}
+.home-sub{color:var(--muted);font-size:.9rem;text-align:center;margin-bottom:40px;max-width:460px}
+.session-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:32px}
+.sc{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:22px 24px;cursor:pointer;width:220px;transition:.2s;text-align:center;position:relative}
+.sc:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow)}
+.sc-icon{font-size:1.8rem;margin-bottom:10px}
+.sc-title{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:6px}
+.sc-desc{font-size:.75rem;color:var(--muted);line-height:1.4}
+.sc-badge{position:absolute;top:-8px;right:-8px;background:var(--gold);color:#fff;font-size:.6rem;padding:2px 8px;border-radius:20px;font-weight:700}
+.resume-wrap{margin-bottom:24px}
+.resume-banner{background:var(--ink);color:var(--paper);border-radius:8px;padding:14px 20px;display:flex;align-items:center;gap:14px;max-width:480px;border:1px solid var(--gold)}
+.rb-text strong{display:block;font-size:.88rem;margin-bottom:2px;color:var(--gold-l)}
+.rb-text span{font-size:.75rem;opacity:.7}
+.btn-resume{background:var(--gold);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:700;white-space:nowrap}
+.btn-sec{background:none;border:1px solid var(--border);color:var(--muted);padding:9px 18px;border-radius:6px;cursor:pointer;font-size:.8rem;font-family:inherit;margin:4px;transition:.2s}
+.btn-sec:hover{border-color:var(--gold);color:var(--gold)}
+
+/* EXAM */
+#exam{padding:76px 0 120px;min-height:100vh}
+.exam-inner{max-width:780px;margin:0 auto;padding:0 20px}
+.q-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.q-num{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);background:var(--cream);padding:3px 9px;border-radius:4px}
+.q-area-tag{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:700}
+.q-session{margin-left:auto;font-size:.68rem;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.q-ctx{background:var(--cream);border-left:3px solid var(--gold);padding:12px 14px;border-radius:0 6px 6px 0;font-size:.84rem;line-height:1.6;margin-bottom:16px;max-height:200px;overflow-y:auto;display:none}
+.q-ctx.show{display:block}
+.ctx-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);font-weight:700;margin-bottom:6px}
+.q-inst{font-size:.84rem;color:var(--muted);margin-bottom:12px;line-height:1.5}
+.q-title{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:20px;color:var(--ink)}
+.items-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.item-row{display:flex;align-items:flex-start;gap:10px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;transition:.15s}
+.item-n{font-family:'IBM Plex Mono',monospace;font-size:.78rem;min-width:18px;margin-top:2px;font-weight:700;color:var(--muted);flex-shrink:0}
+.item-t{font-size:.85rem;line-height:1.55;flex:1}
+.item-btns{display:flex;gap:5px;margin-left:8px;flex-shrink:0;align-self:center}
+.btn-c,.btn-e{border:none;padding:6px 14px;border-radius:5px;font-size:.8rem;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit}
+.btn-c{background:#ddf0e4;color:#1a5c2a}.btn-c:hover{background:#1a5c2a;color:#fff}
+.btn-e{background:#fce4e4;color:#8b1a1a}.btn-e:hover{background:#8b1a1a;color:#fff}
+.btn-c:disabled,.btn-e:disabled{cursor:default;opacity:.45}
+.item-fb{font-size:1rem;margin-left:4px;flex-shrink:0;align-self:center;display:none}
+.item-row.answered .item-fb{display:block}
+.item-row.ok{border-color:#1a5c2a;background:#f0faf3}.item-row.ok .item-n{color:#1a5c2a}
+.item-row.err{border-color:#8b1a1a;background:#fdf0f2}.item-row.err .item-n{color:#8b1a1a}
+.item-row.ann{border-color:#b8860b;background:#fdf8ec}.item-row.ann .item-n{color:#b8860b}
+.q-flash{display:none;padding:10px 18px;border-radius:8px;margin-bottom:14px;font-size:.88rem;font-weight:600;text-align:center}
+.q-flash.show{display:block}
+.q-flash.perfect{background:#ddf0e4;color:#1a5c2a;border:1px solid #1a5c2a}
+.q-flash.partial{background:#fef6e4;color:#7a5a00;border:1px solid #c9940a}
+.q-flash.zero{background:#fce4e4;color:#8b1a1a;border:1px solid #8b1a1a}
+.comment-area{margin-bottom:16px}
+.comment-btn{background:none;border:1px dashed var(--border);color:var(--muted);padding:7px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;width:100%;text-align:left;transition:.2s;font-family:inherit}
+.comment-btn:hover{border-color:var(--gold);color:var(--gold)}
+.comment-box{display:none;margin-top:8px}
+.comment-box textarea{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:9px 12px;font-family:inherit;font-size:.83rem;resize:vertical;min-height:70px;background:var(--card);color:var(--ink);outline:none}
+.comment-box textarea:focus{border-color:var(--gold)}
+.btn-save-comment{margin-top:5px;background:var(--gold);color:#fff;border:none;padding:7px 18px;border-radius:5px;cursor:pointer;font-size:.8rem;font-family:inherit}
+.nav-row{display:flex;gap:10px;justify-content:flex-end;align-items:center}
+.btn-next{background:var(--ink);color:var(--paper);border:none;padding:13px 32px;border-radius:8px;font-size:.95rem;cursor:pointer;font-family:inherit;font-weight:600;transition:.2s}
+.btn-next:hover{background:var(--gold)}
+.btn-prev{background:var(--card);color:var(--ink);border:1.5px solid var(--border);padding:13px 20px;border-radius:8px;font-size:.85rem;cursor:pointer;font-family:inherit;transition:.2s}
+.btn-prev:hover{border-color:var(--gold)}
+
+/* DASH */
+#dash{min-height:100vh;padding:80px 24px 60px}
+.dash-inner{max-width:880px;margin:0 auto}
+.page-title{font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:4px}
+.page-sub{color:var(--muted);font-size:.88rem;margin-bottom:32px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:32px}
+.kpi{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:18px}
+.kpi-val{font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);margin-bottom:4px}
+.kpi-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.sec-title{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.area-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px}
+@media(max-width:560px){.area-grid{grid-template-columns:1fr}}
+.area-card{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:16px}
+.area-name{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.bar-wrap{background:var(--cream);height:7px;border-radius:4px;margin-bottom:6px;overflow:hidden}
+.bar{height:100%;border-radius:4px;background:var(--gold)}.bar.good{background:var(--green)}.bar.bad{background:var(--red)}
+.area-stats{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted)}
+.insight-card{display:flex;gap:12px;padding:14px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;margin-bottom:10px}
+.ic-icon{font-size:1.3rem;flex-shrink:0;margin-top:1px}
+.ic-body strong{display:block;font-size:.87rem;margin-bottom:3px}
+.ic-body p{font-size:.8rem;color:var(--muted);line-height:1.45}
+.study-box{background:var(--ink);color:var(--paper);border-radius:10px;padding:22px;margin-bottom:10px}
+.study-box h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold-l);margin-bottom:10px}
+.study-box ul{padding-left:18px;font-size:.82rem;line-height:1.75;opacity:.85}
+
+/* COMMENTS */
+#comments-screen{min-height:100vh;padding:80px 24px 60px}
+.comments-inner{max-width:780px;margin:0 auto}
+.comment-item{background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:12px}
+.ci-q{font-size:.75rem;color:var(--gold);font-weight:700;margin-bottom:3px}
+.ci-meta{font-size:.72rem;color:var(--muted);margin-bottom:6px;font-family:'IBM Plex Mono',monospace}
+.ci-text{font-size:.88rem;line-height:1.5}
+.no-comments{text-align:center;color:var(--muted);padding:60px 0}
+
+/* COMPLETE */
+#complete{min-height:100vh;padding:80px 24px 60px}
+.complete-inner{max-width:500px;text-align:center}
+.big-score{font-family:'Playfair Display',serif;font-size:4rem;color:var(--gold);margin-bottom:8px}
+.complete-inner h2{font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:12px}
+.complete-inner h2 em{color:var(--gold);font-style:italic}
+.complete-inner p{color:var(--muted);margin-bottom:32px}
+.btn-gold{background:var(--gold);color:#fff;border:none;padding:14px 36px;border-radius:8px;font-size:.95rem;cursor:pointer;font-weight:700;font-family:inherit;margin:5px;transition:.2s}
+.btn-gold:hover{background:var(--gold-l)}
+.btn-dark{background:var(--ink);color:var(--paper);border:none;padding:14px 36px;border-radius:8px;font-size:.95rem;cursor:pointer;font-weight:600;font-family:inherit;margin:5px}
+
+/* MENU */
+#menu-overlay{position:fixed;inset:0;background:rgba(26,22,20,.6);z-index:200;display:none;align-items:flex-start;justify-content:flex-end;padding:64px 12px 0}
+#menu-overlay.open{display:flex}
+#menu-panel{background:var(--card);border:1.5px solid var(--border);border-radius:10px;width:250px;overflow:hidden;box-shadow:0 16px 48px var(--shadow)}
+.mi{display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:pointer;font-size:.88rem;transition:.15s;border-bottom:1px solid var(--border)}
+.mi:last-child{border-bottom:none}
+.mi:hover{background:var(--cream);color:var(--gold)}
+.mi-ico{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--paper);padding:11px 22px;border-radius:8px;font-size:.83rem;transition:transform .3s;z-index:300;border:1px solid var(--gold);pointer-events:none;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--cream)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">IRBr · 2024</div>
+  <div class="stats-row">
+    <div class="stat-pill"><span class="val" id="s-ans">0</span><span class="lbl">Respondidas</span></div>
+    <div class="stat-pill"><span class="val" id="s-cor">0</span><span class="lbl">Corretas</span></div>
+    <div class="stat-pill"><span class="val" id="s-pct">–</span><span class="lbl">Aproveit.</span></div>
+  </div>
+  <button id="menu-btn" onclick="toggleMenu()">☰ Menu</button>
+</div>
+<div id="pbar-wrap"><div id="pbar"></div></div>
+
+<!-- Save indicator -->
+<div id="save-dot"><div id="save-dot-circle"></div><span id="save-label">Salvo</span></div>
+
+<div id="menu-overlay" onclick="overlayClick(event)">
+  <div id="menu-panel">
+    <div class="mi" onclick="goHome()"><span class="mi-ico">🏠</span>Início</div>
+    <div class="mi" onclick="manualSave()"><span class="mi-ico">💾</span>Salvar agora</div>
+    <div class="mi" onclick="goDash()"><span class="mi-ico">📊</span>Estatísticas</div>
+    <div class="mi" onclick="goComments()"><span class="mi-ico">🗒️</span>Minhas anotações</div>
+    <div class="mi" onclick="shareResult()"><span class="mi-ico">🔗</span>Compartilhar resultado</div>
+    <div class="mi" onclick="confirmReset()"><span class="mi-ico">🔄</span>Recomeçar tudo</div>
+    <div class="mi" onclick="closeMenu()"><span class="mi-ico">✕</span>Fechar</div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <h1 class="home-title">Simulado <em>IRBr</em><br>1ª Fase · 2024</h1>
+  <p class="home-sub">Pratique as 65 questões oficiais com gabarito definitivo do Cebraspe. Progresso salvo automaticamente no navegador.</p>
+  <div class="resume-wrap" id="resume-wrap"></div>
+  <div class="session-cards">
+    <div class="sc" onclick="startSession('manha')">
+      <div class="sc-icon">🌅</div>
+      <div class="sc-title">Prova da Manhã</div>
+      <div class="sc-desc">Q1–33 · Português, Política Int., Geografia, Direito</div>
+      <div class="sc-badge" id="badge-manha" style="display:none">Em progresso</div>
+    </div>
+    <div class="sc" onclick="startSession('tarde')">
+      <div class="sc-icon">🌇</div>
+      <div class="sc-title">Prova da Tarde</div>
+      <div class="sc-desc">Q34–65 · Inglês, História BR, História Mundial, Economia</div>
+      <div class="sc-badge" id="badge-tarde" style="display:none">Em progresso</div>
+    </div>
+    <div class="sc" onclick="startSession('completo')">
+      <div class="sc-icon">📋</div>
+      <div class="sc-title">Prova Completa</div>
+      <div class="sc-desc">Todas as 65 questões em sequência</div>
+    </div>
+  </div>
+  <button class="btn-sec" onclick="goDash()">📊 Ver Estatísticas</button>
+</div>
+
+<!-- EXAM -->
+<div id="exam" class="screen">
+  <div class="exam-inner">
+    <div class="q-header">
+      <span class="q-num" id="q-num">Q–</span>
+      <span class="q-area-tag" id="q-area"></span>
+      <span class="q-session" id="q-sess"></span>
+    </div>
+    <div class="q-ctx" id="q-ctx"><div class="ctx-label">Texto / Contexto</div><div id="q-ctx-text"></div></div>
+    <div class="q-inst" id="q-inst"></div>
+    <div class="q-title" id="q-title"></div>
+    <div class="items-list" id="items-list"></div>
+    <div class="q-flash" id="q-flash"></div>
+    <div class="comment-area">
+      <button class="comment-btn" id="comment-btn" onclick="toggleComment()">💬 Adicionar anotação…</button>
+      <div class="comment-box" id="comment-box">
+        <textarea id="comment-ta" placeholder="Sua anotação, dica ou lembrete sobre esta questão…"></textarea>
+        <button class="btn-save-comment" onclick="saveComment()">Salvar anotação</button>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-prev" id="btn-prev" onclick="prevQ()">← Anterior</button>
+      <button class="btn-next" id="btn-next" onclick="nextQ()">Próxima →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASH -->
+<div id="dash" class="screen">
+  <div class="dash-inner">
+    <div class="page-title">Painel de Desempenho</div>
+    <div class="page-sub">Análise detalhada do seu aproveitamento por área.</div>
+    <div class="kpi-row" id="kpi-row"></div>
+    <div class="sec-title">Desempenho por Área</div>
+    <div class="area-grid" id="area-grid"></div>
+    <div class="sec-title">Análise & Pontos de Melhoria</div>
+    <div id="insights"></div>
+    <div class="sec-title" style="margin-top:28px">Recomendações de Estudo</div>
+    <div id="study-recs"></div>
+    <div style="text-align:center;margin-top:28px">
+      <button class="btn-sec" onclick="goHome()">← Voltar ao Início</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMMENTS -->
+<div id="comments-screen" class="screen">
+  <div class="comments-inner">
+    <div class="page-title">Minhas Anotações</div>
+    <div class="page-sub">Todos os lembretes e comentários salvos por questão.</div>
+    <div id="comments-list"></div>
+    <div style="text-align:center;margin-top:24px">
+      <button class="btn-sec" onclick="goHome()">← Voltar ao Início</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETE -->
+<div id="complete" class="screen">
+  <div class="complete-inner">
+    <div class="big-score" id="c-score">–</div>
+    <h2>Prova <em>concluída!</em></h2>
+    <p id="c-msg"></p>
+    <button class="btn-gold" onclick="goDash()">Ver Análise Completa</button>
+    <button class="btn-dark" onclick="goHome()">Voltar ao Início</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+{id:1,session:'manha',area:'Língua Portuguesa',
+ context:'(...) as nações latinas do Novo Mundo não se podem queixar de deslembradas. Cada incidente, ainda sem grande relevo, encontra repercussão na imprensa europeia. Não aparecem, é verdade, nenhuns desses longos estudos, circunstanciados e sábios, onde os mestres em assuntos internacionais dizem o que sabem sobre a história política, social e econômica do país de que se ocupam, para daí deduzirem os seus juízos. Não; como de costume, sempre que se trata das repúblicas latino-americanas, os doutores e publicistas da política mundial se limitam a lavrar sentenças — invariáveis e condenatórias. Como variantes dessas sentenças, eles se limitam a ditar, de tempos em tempos, uns tantos conselhos axiomáticos. (Manoel Bomfim. América Latina: males de origem.)',
+ instruction:'Em relação às ideias e aos aspectos linguísticos do Texto I, julgue (C ou E) os itens a seguir.',
+ text:'Questão 1 — Análise do Texto I (Manoel Bomfim)',
+ items:[
+      {n:1,t:'No terceiro período do texto, o termo circunstanciados se refere às condicionantes da produção do conhecimento científico da época, ou às circunstâncias da epistemologia vigente.'},
+      {n:2,t:'Na construção argumentativa do texto, o autor faz uma pausa retórica mediante o emprego do Não (quarto período), para relativizar sua oposição ao conteúdo do período imediatamente anterior, e repete, nos dois últimos períodos, a expressão se limitam com o propósito de reforçar sua crítica à visão eurocêntrica, por ele considerada superficial e pretensamente superior.'},
+      {n:3,t:'Infere-se do texto que as nações latino-americanas não são lembradas pela imprensa europeia, ou, quando o são, servem, no máximo, como objeto de críticas, de sentenças condenatórias.'},
+      {n:4,t:'Segundo o autor do texto, cada incidente ocorrido na América Latina é objeto de estudos aprofundados destinados a lavrar sentenças condenatórias.'},
+    ],answers:['E','E','C','E']},
+{id:2,session:'manha',area:'Língua Portuguesa',
+ context:'Um senhor que conheci fez-se uma celebridade em astronomia, com auxílio dos saraus que lhe eram oferecidos pelos amigos (...). E tudo isso com mais uns amigos dedicados a lhe oferecer bailes, por ocasião das suas portentosas descobertas nos céus ignotos, levaram o governo da Bruzundanga a nomeá-lo diretor (...). Para obviar tais inconvenientes, houve alguém que teve a ideia de canalizar, de disciplinar o entusiasmo do povo bruzundanguense, entusiasmo tão necessário às manifestações que lá há constantemente, e tão indispensáveis são ao fabrico de grandes homens que dirijam os destinos da grande e formosa República (...). (Lima Barreto. Os bruzundangas.)',
+ instruction:'No que se refere aos sentidos e aos aspectos linguísticos do Texto II, julgue (C ou E) os itens seguintes.',
+ text:'Questão 2 — Análise do Texto II (Lima Barreto)',
+ items:[
+      {n:1,t:'No segundo parágrafo, o autor assinala que alguém teve a ideia de canalizar, de disciplinar o entusiasmo do povo bruzundanguense com a finalidade de tornar óbvios os inconvenientes da prática de bailes e saraus para fabricar os grandes homens da República.'},
+      {n:2,t:'No segmento nos céus ignotos (segundo período do primeiro parágrafo), para expressar a natureza desconhecida do firmamento, o narrador atribui aos céus uma qualidade intrinsecamente humana.'},
+      {n:3,t:'Evidencia-se no texto o emprego de paradoxo, que remete, em sentido conotativo, ao oposto daquilo que de fato o narrador afirma.'},
+      {n:4,t:'O termo portentosas (segundo período do primeiro parágrafo) poderia ser substituído no texto, sem prejuízo da coerência de suas ideias, por assombrosas.'},
+    ],answers:['E','E','C','C']},
+{id:3,session:'manha',area:'Língua Portuguesa',
+ context:'Texto III — Lilia Moritz Schwarcz, O espetáculo das raças: Afinal, os homens nascem iguais, apenas sem uma definição completa da natureza. Em Rousseau, com a noção do bom selvagem, essa ideia estará absolutamente presente. A alteridade desses novos homens transformada em modelo lógico se contrapunha à experiência ocidental. Como concluía Rousseau: se há uma bondade original da natureza humana, a evolução social corrompeu-a. O famoso filósofo da Ilustração encontrava um modelo ideal nesse outro tão distante do nós, ocidentais, e o elegia como moralmente superior. No entanto, ao conformar esse quadro antitético, Rousseau de certa forma se afastava da Ilustração, já que refletia sobre um progresso às avessas.',
+ instruction:'Em relação aos sentidos do Texto III, julgue (C ou E) os itens a seguir.',
+ text:'Questão 3 — Sentidos do Texto III (Schwarcz)',
+ items:[
+      {n:1,t:'No quarto parágrafo, o segmento conformar esse quadro antitético pode ser entendido como contextualizar, de forma contrária à visão do Iluminismo, a natureza humana.'},
+      {n:2,t:'No segundo período do quinto parágrafo, o advérbio simetricamente transmite a ideia de que, quanto maior o conhecimento sobre os povos colonizados, mais se confirma a tese do bom selvagem.'},
+      {n:3,t:'Entende-se da leitura do segundo e do terceiro parágrafos que o sentido dado pela autora ao termo alteridade é o de distinção entre a humanidade resultante da experiência ocidental e da evolução social e os outros, caracterizados como o bom selvagem e os novos homens.'},
+      {n:4,t:'Depreende-se da leitura do texto que Rousseau, ao propor a imagem do bom selvagem, se alinha à tese, proposta pela Ilustração, de progresso da natureza humana.'},
+    ],answers:['C','E','C','E']},
+{id:4,session:'manha',area:'Língua Portuguesa',
+ context:null,
+ instruction:'Ainda em relação ao Texto III, julgue (C ou E) os itens a seguir.',
+ text:'Questão 4 — Aspectos do Texto III',
+ items:[
+      {n:1,t:'Segundo a autora, a hipótese teórica poligenista tornou-se hegemônica no século XIX.'},
+      {n:2,t:'Os prefixos presentes nas palavras que designam as correntes monogenista e poligenista remetem às distintas hipóteses sobre a gênese da humanidade, que contrapõem a unidade da espécie à diversidade racial.'},
+      {n:3,t:'No primeiro período do quinto parágrafo, a conjunção subordinativa se introduz uma condição real, o que é evidenciado pelo modo verbal empregado na oração em que ocorre.'},
+      {n:4,t:'O segmento visão idílica (primeiro período do quinto parágrafo) remete à noção bucólica do bom selvagem de Rousseau, que representa um devaneio, uma utopia.'},
+    ],answers:['E','C','C','C']},
+{id:5,session:'manha',area:'Língua Portuguesa',
+ context:'Texto IV — Ailton Krenak: Assim como aquela senhora hopi que conversava com a pedra, sua irmã, tem um monte de gente que fala com montanhas. No Equador, na Colômbia, em algumas dessas regiões dos Andes, você encontra lugares onde as montanhas formam casais. Tem mãe, pai, filho, tem uma família de montanhas que troca afeto, faz trocas. E as pessoas que vivem nesses vales fazem festas para essas montanhas, dão comida, dão presentes, ganham presentes das montanhas. (...) O tipo de humanidade zumbi que estamos sendo convocados a integrar não tolera tanto prazer, tanta fruição de vida. (...) O Rio Doce, que nós, os Krenak, chamamos de Watu, nosso avô, é uma pessoa, não um recurso, como dizem os economistas. (...) A conclusão ou compreensão de que estamos vivendo uma era que pode ser identificada como Antropoceno deveria soar como um alarme nas nossas cabeças.',
+ instruction:'Em relação a aspectos linguísticos e estilísticos do Texto IV, julgue (C ou E) os itens que se seguem.',
+ text:'Questão 5 — Aspectos do Texto IV (Ailton Krenak)',
+ items:[
+      {n:1,t:'No último parágrafo, o autor utiliza um neologismo para denominar a era que marca o momento atual em que vive a humanidade.'},
+      {n:2,t:'Aspectos antitéticos dos seres humanos são explorados na passagem do primeiro parágrafo, em que prevalece o uso da prosopopeia, ao segundo parágrafo, que remete ao Antropoceno.'},
+      {n:3,t:'Ao chamar o Rio Doce de Watu (terceiro parágrafo), o autor emprega uma metáfora.'},
+      {n:4,t:'No segundo parágrafo do texto, o autor utiliza metonímia para qualificar o tipo de humanidade que as pessoas estão sendo convocadas a integrar.'},
+    ],answers:['X','X','C','E']},
+{id:6,session:'manha',area:'Língua Portuguesa',
+ context:'Texto V — Machado de Assis, Carnívoros e vegetarianos (1892): Quando os jornais anunciaram para o dia 1.º deste mês uma parede de açougueiros, a sensação que tive foi muito diversa da de todos os meus concidadãos. Vós ficastes aterrados; eu agradeci o acontecimento ao céu. Boa ocasião para converter esta cidade ao vegetarismo. Não sei se sabem que eu era carnívoro por educação e vegetariano por princípio. Criaram-me a carne, mais carne, ainda carne, sempre carne. Quando cheguei ao uso da razão e organizei o meu código de princípios, incluí nele o vegetarismo; mas era tarde para a execução. Fiquei carnívoro. Era a sorte humana; foi a minha. Não importa, o homem é carnívoro. Deus, ao contrário, é vegetariano. Para mim, a questão do paraíso terrestre explica-se clara e singelamente pelo vegetarismo. Deus criou o homem para os vegetais, e os vegetais para o homem.',
+ instruction:'Considerando as ideias e os aspectos linguísticos do Texto V, julgue (C ou E) os itens subsequentes.',
+ text:'Questão 6 — Ideias do Texto V (Machado de Assis)',
+ items:[
+      {n:1,t:'Na narrativa, a deflagração de um movimento paredista dos açougueiros é a situação que oportuniza ao narrador apresentar uma análise crítica de hábitos alimentares junto aos familiares.'},
+      {n:2,t:'No texto, percebe-se a intenção do narrador em apresentar uma experiência traumática com a alimentação na infância, algo que seria determinado pela sorte, o destino do ser humano.'},
+      {n:3,t:'Da leitura do segundo parágrafo conclui-se, consideradas a estrutura narrativa da crônica e a sequência temporal empregada no primeiro período desse parágrafo, que a oração eu era carnívoro, apesar da flexão verbal no pretérito imperfeito do indicativo, pode ser interpretada como correspondente ao presente do indicativo.'},
+      {n:4,t:'Evidencia-se na narrativa que o movimento paredista desencadeia um afastamento do narrador em relação à infância, o que o leva a uma crítica a hábitos adquiridos em seu percurso no sistema educacional e, ao mesmo tempo, a uma defesa da racionalidade humana.'},
+    ],answers:['C','E','C','E']},
+{id:7,session:'manha',area:'Língua Portuguesa',
+ context:null,
+ instruction:'No que diz respeito aos aspectos morfossintáticos e semânticos do Texto V, julgue (C ou E) os seguintes itens.',
+ text:'Questão 7 — Aspectos morfossintáticos do Texto V',
+ items:[
+      {n:1,t:'Em Criaram-me a carne (segundo período do segundo parágrafo), observa-se uma estratégia de indeterminação do sujeito que se explicitaria igualmente com a estrutura Criou-se a carne.'},
+      {n:2,t:'No segundo período do primeiro parágrafo, os elementos da coordenação assindética estão ligados, semanticamente, com base em uma noção de contraste.'},
+      {n:3,t:'Sem prejuízo sintático e semântico do processo narrativo do texto, o primeiro período do primeiro parágrafo poderia ser reestruturado da seguinte maneira: A sensação que tive foi muito diversa da de todos os meus concidadãos quando os jornais anunciaram para o dia 1.º deste mês uma parede de açougueiros.'},
+      {n:4,t:'No primeiro período do texto, o emprego da forma participial tida em lugar da oração que tive preservaria as relações sintáticas do período e as relações semânticas estabelecidas entre seus termos.'},
+    ],answers:['E','C','C','E']},
+{id:8,session:'manha',area:'Língua Portuguesa',
+ context:null,
+ instruction:'Ainda com base no Texto V, julgue (C ou E) os itens que se seguem, relativos a seus aspectos morfossintáticos e semânticos.',
+ text:'Questão 8 — Morfossintaxe do Texto V',
+ items:[
+      {n:1,t:'Em Os vegetarianos não se batem (último parágrafo), o pronome se que acompanha a forma verbal tem sentido reflexivo, estando subentendida a expressão a si mesmos ao final da oração.'},
+      {n:2,t:'Na estrutura predicativa que compõe o quarto período do segundo parágrafo, o verbo denota um estado permansivo da qualidade atribuída ao narrador.'},
+      {n:3,t:'No terceiro período do último parágrafo, emprega-se a forma pronominal do verbo dar, cujo significado se assemelha ao do verbo ver em estrutura pronominal, embora as formas se distingam no que se refere à regência verbal.'},
+      {n:4,t:'No segundo período do terceiro parágrafo, estão coordenados um adjetivo, clara, que qualifica o termo questão, e um advérbio, singelamente, que exprime o modo como se dá a ação de explicar no contexto em questão.'},
+    ],answers:['E','C','C','E']},
+{id:9,session:'manha',area:'Língua Portuguesa',
+ context:'Texto VI — Roland Barthes, O bife com batatas fritas: O bife e o vinho compartilham a mitologia sanguínea. É o coração da carne, e qualquer um que a consuma assimila a força do touro. Obviamente, o prestígio do bife deve-se ao seu estado de semicrueza. E assim como o vinho se transforma, para um bom número de intelectuais, em substância mediúnica que os conduz à força original da natureza, do mesmo modo o bife é para eles um alimento de redenção, graças ao qual tornam o seu cerebralismo mais prosaico. Tal como o vinho, na França, o bife é um elemento básico, mais nacionalizado do que socializado, estando presente em todos os cenários da vida alimentar; participa de todos os ritmos, desde a confortável refeição burguesa ao lanche boêmio do celibatário.',
+ instruction:'Julgue (C ou E) os próximos itens, relativos a aspectos linguísticos e ortográficos do Texto VI.',
+ text:'Questão 9 — Aspectos linguísticos do Texto VI (Barthes)',
+ items:[
+      {n:1,t:'No terceiro período do primeiro parágrafo, a expressão de modo a enfatiza o esforço empreendido pelo sujeito da ação expressa pelo verbo fazer, podendo ser substituída, sem prejuízo da correção gramatical e da coesão textual, pela expressão com o intuito de.'},
+      {n:2,t:'No trecho participa de todos os ritmos, desde a confortável refeição burguesa ao lanche boêmio do celibatário (primeiro período do último parágrafo), a expressão desde a ... ao ..., que se refere a uma extensão espacial, não estabelece restrição de ordem no que se refere à estruturação dos elementos espaciais, o que permite a inversão da ordem desses elementos, sem prejuízo da correção gramatical.'},
+      {n:3,t:'No trecho e qualquer um que a consuma (segundo período do primeiro parágrafo), o pronome átono a, empregado anaforicamente, poderia ser, correta e coerentemente, substituído por o, em referência a bife (primeiro período do primeiro parágrafo), dada a similaridade semântica entre os elementos referenciados.'},
+      {n:4,t:'A grafia das palavras formadas pelo prefixo semi-, como semicrueza e semi-inteiro, por exemplo, obedece à mesma regra ortográfica que define a grafia das palavras formadas pelos prefixos co- e re-, no que se refere ao emprego ou não de hífen.'},
+    ],answers:['C','E','C','E']},
+{id:10,session:'manha',area:'Língua Portuguesa',
+ context:null,
+ instruction:'Ainda em relação ao Texto VI, julgue (C ou E) os itens a seguir.',
+ text:'Questão 10 — Análise crítica do Texto VI',
+ items:[
+      {n:1,t:'Na análise crítica de aspectos culturais, o bife é caracterizado no texto duplamente como elemento de alienação e como elemento redentor.'},
+      {n:2,t:'No texto, o autor contesta a ideia do intelecto privilegiado dos intelectuais, o que os coloca na esfera dos mitos da sociedade.'},
+      {n:3,t:'No texto, a análise de elementos gastronômicos, como o bife, as batatas fritas, com a inclusão do vinho francês, é referenciada com o aporte semântico dos nomes e de sua simbologia, a partir do qual o autor tece sua visão crítica acerca da sociedade capitalista.'},
+      {n:4,t:'A proposição básica do autor é apontar a alienação do povo, por meio da denúncia da propagação de mensagens fantasiosas na mídia.'},
+    ],answers:['E','E','C','E']},
+{id:11,session:'manha',area:'Política Internacional',
+ context:'Em 30 de maio de 2023, a convite do presidente do Brasil, os líderes dos países sul-americanos reuniram-se em Brasília. O principal tema discutido durante o encontro foi a retomada da agenda de integração regional. O projeto Rotas de Integração e Desenvolvimento Sul-Americano, desenhado pelo Ministério do Planejamento e Orçamento, visa responder à demanda apresentada pelos mandatários durante o encontro.',
+ instruction:'Considerando o projeto mencionado e a integração do Brasil com os países sul-americanos, julgue (C ou E) os itens a seguir.',
+ text:'Questão 11 — Rotas de Integração Sul-Americana',
+ items:[
+      {n:1,t:'A chamada Rota da Ilha das Guianas, que inclui a Guiana, a Guiana Francesa, o Suriname e a Venezuela, além dos estados brasileiros do Amapá, Amazonas, Pará e Roraima, tem como uma de suas principais vias de interconexão a estrada Transguianense, que liga Caiena, na Guiana Francesa, com Paramaribo, no Suriname, e com Georgetown, na Guiana.'},
+      {n:2,t:'A integração econômica, política, social e cultural dos povos da América Latina é expressamente prevista na Constituição Federal de 1988.'},
+      {n:3,t:'As jazidas de fertilizantes potássicos recém-descobertas nas cidades de Itacoatiara e Itapiranga, ambas no estado do Amazonas, representam vantagens energéticas e logísticas não só para o Brasil, como também para outros países da região amazônica.'},
+      {n:4,t:'Além de recursos orçamentários, as obras de integração previstas no referido projeto devem contar com financiamento do BNDES, do BID, do CAF, do FONPLATA e do FMI.'},
+    ],answers:['C','C','E','E']},
+{id:12,session:'manha',area:'Política Internacional',
+ context:'Marco da integração sul-americana, o Tratado de Cooperação Amazônica (TCA), assinado em 1978 por oito países — Brasil, Bolívia, Colômbia, Equador, Guiana, Peru, Suriname e Venezuela —, entrou em vigor em 1980. Em 1998, as oito nações signatárias decidiram criar a Organização do Tratado de Cooperação Amazônica (OTCA). Nos dias 8 e 9 de agosto de 2023, foi realizada, no Brasil, a Conferência da Cúpula da Amazônia — IV Reunião dos Presidentes dos Estados-partes no TCA.',
+ instruction:'Em relação à cooperação amazônica e à IV Reunião dos Presidentes dos Estados-partes no TCA, julgue (C ou E) os itens subsequentes.',
+ text:'Questão 12 — Cooperação Amazônica (OTCA / TCA)',
+ items:[
+      {n:1,t:'Na reunião em questão, aprovou-se a entrada da França na OTCA, dada a condição amazônica da Guiana Francesa, com a expectativa de que a entrada de um país da União Europeia na organização tenha impactos positivos para o financiamento de políticas e programas voltados para o desenvolvimento sustentável da região amazônica.'},
+      {n:2,t:'No dia 9 de agosto de 2023, ainda em Belém, os presidentes dos Estados-partes no TCA mantiveram encontro com mandatários e representantes de países em desenvolvimento de outras regiões do mundo com florestas tropicais, como Indonésia, República Democrática do Congo e República do Congo, tendo sido adotado o documento Unidos por Nossas Florestas.'},
+      {n:3,t:'Realizada em Belém do Pará, a reunião contou com a participação de todos os países signatários do TCA, além de representantes de países convidados e de organismos internacionais, tendo sido a primeira reunião de presidentes dos Estados-partes no TCA desde 2009.'},
+      {n:4,t:'Na declaração presidencial emitida por ocasião da reunião, os mandatários dos Estados-partes no TCA concordaram em promover mecanismos inovadores de financiamento para ações climáticas, incluindo a troca de dívidas por ações climáticas.'},
+    ],answers:['E','C','C','C']},
+{id:13,session:'manha',area:'Política Internacional',
+ context:'As relações entre Brasil e Argentina são marcadas pela intensidade dos fluxos bilaterais de comércio e de investimentos e pela integração da infraestrutura física dos países. O perfil do comércio bilateral entre Brasil e Argentina é caracterizado pela grande participação da indústria de transformação e pelo elevado valor agregado dos produtos transacionados.',
+ instruction:'Acerca das relações socioeconômicas e políticas entre Brasil e Argentina, julgue (C ou E) os próximos itens.',
+ text:'Questão 13 — Relações Brasil-Argentina',
+ items:[
+      {n:1,t:'A construção de gasoduto a partir de Vaca Muerta representa uma janela de oportunidades importante para o Brasil: de um lado, a possibilidade de exportação de insumos brasileiros para a obra; de outro, o fortalecimento da segurança energética nacional e regional.'},
+      {n:2,t:'A Argentina dispõe de depósitos de hidrocarbonetos não convencionais concentrados sobretudo na província de Neuquén, na área da formação geológica denominada Vaca Muerta, e a importação de gás argentino pelo Brasil poderia contribuir para a superação de desafios brasileiros no setor energético.'},
+      {n:3,t:'Em 2023, a Argentina foi o terceiro principal destino das exportações brasileiras; com exceção de 2023, nos últimos dez anos, mais de 90% do valor exportado pelo Brasil para a Argentina foi composto de produtos da indústria de transformação.'},
+      {n:4,t:'A soja é o principal produto agrícola exportado pela Argentina, e, no período de 2022 a 2023, devido a condições climáticas favoráveis, a safra argentina de soja mais que dobrou em relação ao volume da safra anterior.'},
+    ],answers:['C','C','E','E']},
+{id:14,session:'manha',area:'Política Internacional',
+ context:null,
+ instruction:'Acerca da relação bilateral entre EUA e Brasil, julgue (C ou E) os itens que se seguem.',
+ text:'Questão 14 — Relação Bilateral EUA-Brasil',
+ items:[
+      {n:1,t:'A atual proximidade de posições políticas entre os dois países evidencia-se em temas como a crise israelo-palestina, a exemplo do apoio estadunidense ao projeto de resolução S/2023/773, apresentado pelo Brasil ao CSNU em outubro de 2023.'},
+      {n:2,t:'Em 2023, os EUA foram o segundo maior parceiro comercial do Brasil e o segundo maior destino de exportações brasileiras, com destaque para a indústria de transformação.'},
+      {n:3,t:'Em 2023, os presidentes do Brasil e dos EUA lançaram a Parceria Global pelos Direitos dos Trabalhadores e Trabalhadoras e a Promoção do Trabalho Digno, que visa à promoção da modernização das relações trabalhistas de ambos os países, por meio da flexibilização de sua legislação.'},
+      {n:4,t:'Em 2023, os governos do Brasil e dos EUA realizaram reunião do Plano de Ação Conjunta para Eliminar a Discriminação Racial e Étnica e Promover a Igualdade, iniciativa que visa à criação de oportunidades que beneficiem, entre outras comunidades raciais e étnicas, afrodescendentes e indígenas de ambos os países.'},
+    ],answers:['E','C','E','C']},
+{id:15,session:'manha',area:'Política Internacional',
+ context:null,
+ instruction:'Acerca das políticas de integração entre os países da América do Sul, julgue (C ou E) os próximos itens.',
+ text:'Questão 15 — Integração Sul-Americana',
+ items:[
+      {n:1,t:'As dificuldades de integração energética no Cone Sul estão relacionadas à ausência histórica de intercâmbios de energia e infraestrutura de interconexões das redes de eletricidade e de gás natural entre os países da região.'},
+      {n:2,t:'É competência do Parlamento do MERCOSUL, conforme seu protocolo constitutivo de dezembro de 2005, velar pela preservação dos regimes democráticos nos Estados-partes.'},
+      {n:3,t:'Entre as iniciativas que contribuíram para a construção de um espaço de integração sul-americano após a redemocratização do Estado brasileiro, incluem-se a realização da I Reunião dos Chefes de Estado e de Governo da América do Sul e a criação da União das Nações Sul-Americanas (UNASUL).'},
+      {n:4,t:'Do ano que antecedeu a criação do MERCOSUL até a virada do último milênio, ou seja, aproximadamente nos dez primeiros anos de existência do bloco, o comércio intrazonal mais que quadruplicou.'},
+    ],answers:['E','C','C','C']},
+{id:16,session:'manha',area:'Política Internacional',
+ context:null,
+ instruction:'Acerca do G-20 e da presidência brasileira no grupo, julgue (C ou E) os itens a seguir.',
+ text:'Questão 16 — G-20 e Presidência Brasileira',
+ items:[
+      {n:1,t:'Em 2024, a União Africana e o BRICS participarão das reuniões do G-20 pela primeira vez como membros plenos.'},
+      {n:2,t:'O G-20 Social é uma das iniciativas pioneiras da presidência brasileira no grupo.'},
+      {n:3,t:'A presidência do Brasil no G-20 defende a proposta de construção de um mundo justo e de um planeta sustentável, na qual são estabelecidas três prioridades: a inclusão social e o combate à fome; a transição energética e o desenvolvimento sustentável; e a reforma das instituições de governança global.'},
+      {n:4,t:'A Aliança Global contra a Fome e a Pobreza busca angariar recursos e conhecimentos para a implementação de políticas públicas e tecnologias sociais comprovadamente eficazes para a redução da fome e da pobreza no mundo, sendo um dos principais mecanismos previstos na iniciativa a criação de um fundo próprio da aliança.'},
+    ],answers:['E','C','C','E']},
+{id:17,session:'manha',area:'Política Internacional',
+ context:null,
+ instruction:'No que diz respeito à evolução do BRICS e a sua relação com outras coalizões e iniciativas internacionais, julgue (C ou E) os seguintes itens.',
+ text:'Questão 17 — BRICS e Iniciativas Internacionais',
+ items:[
+      {n:1,t:'O Novo Banco de Desenvolvimento mobiliza recursos para projetos de infraestrutura e desenvolvimento sustentável em mercados emergentes e países em desenvolvimento, bem como integra a arquitetura de financiamento da iniciativa do cinturão e da rota, um dos pilares da agenda de cooperação do BRICS.'},
+      {n:2,t:'O BRICS não se posiciona oficialmente sobre a reforma do Conselho de Segurança das Nações Unidas (CSNU), pauta defendida pelo IBAS, cujos esforços se concentram na superação dos desafios do desenvolvimento, na defesa de políticas externas independentes e na reforma da governança global.'},
+      {n:3,t:'Durante a Cúpula de Johanesburgo em 2023, foi anunciada a segunda expansão do quadro de membros plenos do BRICS — a primeira ampliação do bloco ocorrera em 2011, com o ingresso formal da África do Sul.'},
+      {n:4,t:'O Novo Banco de Desenvolvimento, com sede permanente em Xangai, foi criado a partir de acordo assinado durante a Cúpula de Fortaleza em 2014 e só pode ser integrado por membros do BRICS.'},
+    ],answers:['E','E','C','E']},
+{id:18,session:'manha',area:'Política Internacional',
+ context:null,
+ instruction:'Em relação à agenda internacional do clima, meio ambiente e desenvolvimento sustentável, julgue (C ou E) os itens que se seguem.',
+ text:'Questão 18 — Agenda Internacional do Clima',
+ items:[
+      {n:1,t:'Em 2023, o Brasil assinou o acordo sobre conservação e uso sustentável da biodiversidade marinha em áreas além da jurisdição nacional (BBNJ), também conhecido como Tratado do Alto-Mar, o qual cria mecanismo de repartição de benefícios advindos da exploração científica e econômica de recursos genéticos marinhos em alto-mar.'},
+      {n:2,t:'A Convenção-Quadro das Nações Unidas sobre Mudança do Clima (UNFCCC), aberta para assinatura por ocasião da Rio-92, inaugurou o regime multilateral para responder ao desafio do aquecimento global.'},
+      {n:3,t:'A Organização do Tratado de Cooperação Amazônica (OTCA), única organização internacional com sede em Brasília, integra como membros todos os países do bioma amazônico, e, como resultado da Cúpula anual dos Países Amazônicos, a Declaração de Belém de 2023 lançou as bases para o fortalecimento institucional da OTCA e reconheceu que a Amazônia atingiu o ponto de não retorno.'},
+      {n:4,t:'Foi lançada na COP 28 a iniciativa Missão 1.5, que, direcionada a estimular os países a assumirem maior ambição na segunda rodada de apresentação das Contribuições Nacionalmente Determinadas (NDC), levou em consideração o relatório de 2023 do IPCC.'},
+    ],answers:['C','C','E','C']},
+{id:19,session:'manha',area:'Política Internacional',
+ context:null,
+ instruction:'Considerando a prioridade conferida pelo governo brasileiro às iniciativas de proteção e promoção dos direitos humanos e de direitos sociais junto aos organismos internacionais, julgue (C ou E) os próximos itens.',
+ text:'Questão 19 — Direitos Humanos e Sociais Internacionais',
+ items:[
+      {n:1,t:'O Brasil copreside a Coalizão Global para a Justiça Social, iniciativa lançada no início de 2024 pela OIT, organismo que foi criado no contexto do final da Primeira Guerra Mundial e que atualmente passa por um processo de reforma em relação ao seu caráter intergovernamental.'},
+      {n:2,t:'Embora a Agenda 2030 tenha estabelecido 17 Objetivos de Desenvolvimento Sustentável (ODS), o Brasil assumiu recentemente também, de forma voluntária, um 18.o ODS inédito, por meio do qual o país se compromete a eliminar o racismo e a discriminação étnico-racial.'},
+      {n:3,t:'Em janeiro de 2023, a diplomacia brasileira atualizou seu posicionamento em fóruns e mecanismos internacionais que tratam da pauta de gênero e direitos de mulheres e meninas, com destaque para a dissociação do Brasil da Declaração do Consenso de Genebra sobre Saúde da Mulher e Fortalecimento da Família.'},
+      {n:4,t:'Por ter assumido, em 2024, mandato eletivo no Conselho de Direitos Humanos (CDH) da ONU, com direito de voz e voto, o Brasil deverá submeter-se, até o final do seu mandato, em 2026, a exame de revisão periódica universal de seus padrões de direitos humanos.'},
+    ],answers:['E','E','C','E']},
+{id:20,session:'manha',area:'Política Internacional',
+ context:null,
+ instruction:'A respeito das temáticas ou tendências globais relevantes para a reflexão e o planejamento estratégico das relações internacionais do Brasil, julgue (C ou E) os seguintes itens.',
+ text:'Questão 20 — Tendências Globais Relevantes',
+ items:[
+      {n:1,t:'Com o propósito de promover a integridade da informação e combater as fake news e o discurso de ódio, a ONU aprovou, no primeiro semestre de 2024, a proposta de convenção internacional sobre regulação de plataformas digitais.'},
+      {n:2,t:'Em 2023, observou-se, em relação aos gastos militares globais, o maior aumento anual desde 2009, conforme relatório do SIPRI; segundo o índice global da paz, em 2024 foi registrado o maior número de conflitos no mundo desde a Segunda Guerra Mundial.'},
+      {n:3,t:'No início de 2024, a OMS adotou um tratado sobre prevenção, prontidão e resposta a pandemias, de cujas negociações o Brasil participou ativamente, tendo defendido amplo acesso a produtos médicos em contextos de emergências sanitárias.'},
+      {n:4,t:'Em 2020, devido à pandemia de covid-19, aos conflitos armados e aos impactos da crise climática, o progresso na redução da pobreza global desacelerou e a fome no mundo aumentou, à exceção de poucas nações, como o Brasil, que se mantiveram fora do Mapa da Fome.'},
+    ],answers:['E','C','E','E']},
+{id:21,session:'manha',area:'Geografia',
+ context:null,
+ instruction:'Em relação à distribuição espacial da população no Brasil e no mundo e aos grandes movimentos migratórios intranacionais e internacionais, julgue (C ou E) os itens subsequentes.',
+ text:'Questão 21 — Distribuição Espacial e Migração',
+ items:[
+      {n:1,t:'Nos últimos vinte anos, o Brasil tem experimentado uma maior diversidade nos fluxos migratórios que recebe, destacando-se o aumento das migrações provindas de países vizinhos, especialmente após a implementação do Acordo sobre Residência para Nacionais dos Estados-partes do MERCOSUL e países associados.'},
+      {n:2,t:'Os Estados-membros da União Europeia têm resistido a ceder sua competência nacional sobre a imigração e o controle de fronteiras em favor de uma abordagem comum em nível europeu.'},
+      {n:3,t:'A análise da distribuição da população segundo a abordagem teórica estrutural é realizada com base na identificação dos elementos naturais que contribuem para essa distribuição.'},
+      {n:4,t:'A alta taxa de crescimento econômico foi o principal fator responsável pela desaceleração no ritmo de crescimento demográfico no Brasil nas últimas três décadas do século XX.'},
+    ],answers:['C','E','E','E']},
+{id:22,session:'manha',area:'Geografia',
+ context:null,
+ instruction:'No que se refere à estruturação e ao funcionamento do agronegócio no Brasil e no mundo, julgue (C ou E) os próximos itens.',
+ text:'Questão 22 — Agronegócio Brasileiro',
+ items:[
+      {n:1,t:'O fato de os saldos comerciais negativos relacionados às importações de insumos necessários para a produção agropecuária não serem considerados no cálculo das exportações líquidas do agronegócio tem pouco impacto na avaliação das exportações de commodities agropecuárias.'},
+      {n:2,t:'A criação da EMBRAPA, marco importante de avanços significativos no setor agrícola brasileiro, foi resultado de uma política pública que visava ao enfrentamento de problemas graves de abastecimento interno de produtos agrícolas, bem como à expansão e à diversificação das exportações.'},
+      {n:3,t:'A expansão do agronegócio no Brasil foi impulsionada por investimentos governamentais na modernização da agricultura, assim como pela reforma da política de crédito rural nos anos 80 do século XX.'},
+      {n:4,t:'A consolidação do mercado internacional de produtos agropecuários tem levado os países importadores a flexibilizar as exigências fitossanitárias e de sustentabilidade dos produtos brasileiros.'},
+    ],answers:['E','C','C','E']},
+{id:23,session:'manha',area:'Geografia',
+ context:'O espaço, por fim, é o conceito-matriz da identidade da própria Geografia. Embora entendido ora como extensão, ora como plano, ora como estrutura, o espaço é o conceito da totalização de todos os clássicos. (Ruy Moreira)',
+ instruction:'Acerca da categoria espaço nas diferentes matrizes e ontologias da geografia clássica, especialmente nos séculos XIX e XX, julgue (C ou E) os itens a seguir.',
+ text:'Questão 23 — Geografia Clássica: A Categoria Espaço',
+ items:[
+      {n:1,t:'O geógrafo francês Vidal de La Blache enfatiza em sua obra o método regional e a criação de tipologias próprias à geografia, como os gêneros de vida, para explicar a relação entre o ser humano e o meio.'},
+      {n:2,t:'Conforme o princípio geográfico basilar do pensamento de Jean Brunhes, a superfície terrestre é a morada do homem e o trabalho é um fator responsável pelo caráter dinâmico e contraditório da construção do espaço.'},
+      {n:3,t:'O geógrafo francês Élisée Reclus expressou em sua obra uma visão revolucionária do mundo ao discutir os avanços tecnológicos de sua época e a constituição de uma sociedade desigual e injusta.'},
+      {n:4,t:'Segundo o geógrafo Pierre George, o homem é o sujeito da sociedade de um espaço organizado pelo trabalho e pela cultura, o que denota a importância da civilização em suas diversas manifestações, pela reunião de hábitos e costumes.'},
+    ],answers:['C','E','C','C']},
+{id:24,session:'manha',area:'Geografia',
+ context:'Na primeira metade do século XX, duas importantes teorias, a do heartland, proposta H. Mackinder, e a do rimland, formulada por Nicholas John Spykman, influenciaram a geopolítica.',
+ instruction:'No que se refere à teoria do rimland, julgue (C ou E) os itens a seguir.',
+ text:'Questão 24 — Teoria do Rimland (Geopolítica)',
+ items:[
+      {n:1,t:'A rápida ascensão econômica da China no cenário global a transformou em novo Estado-pivô da Eurásia, o que fez com que os Estados Unidos da América buscassem estratégias para conter a expansão da influência chinesa tanto na bacia do Pacífico quanto em outras regiões de influência norte-americana.'},
+      {n:2,t:'Com o fim da União Soviética e a crise do socialismo real, os postulados da teoria do rimland ficaram ultrapassados, tendo a OTAN perdido sua influência como bloco militar em face da emergência de blocos geoeconômicos como a União Europeia, a OCDE e o NAFTA.'},
+      {n:3,t:'Também conhecida como teoria do choque das civilizações, a teoria do rimland, cuja proposta se concentra na estratégia de conter a expansão de movimentos contrários ao Ocidente no Oriente Médio, norte da África, Cáucaso e Leste europeu, dominou o debate geopolítico no período que sucedeu a Segunda Guerra Mundial.'},
+      {n:4,t:'Atualmente, Ucrânia e Taiwan constituem centros de tensão geopolítica que envolvem objetivos estratégicos de competição entre as potências contemporâneas Estados Unidos da América, Rússia e China.'},
+    ],answers:['C','E','E','C']},
+{id:25,session:'manha',area:'Geografia',
+ context:'No ano de 2024, intensificou-se o debate público sobre a Proposta de Emenda à Constituição (PEC) n.o 3/2022, que visa modificar a Constituição Federal de 1988, estabelecendo novas diretrizes para a propriedade e gestão dos terrenos de marinha.',
+ instruction:'Em relação aos terrenos de marinha no Brasil e à sua gestão ambiental, julgue (C ou E) os próximos itens.',
+ text:'Questão 25 — Terrenos de Marinha e Gestão Ambiental',
+ items:[
+      {n:1,t:'Há diversos usos econômicos e ações de preservação ambiental na costa brasileira e nos terrenos de marinha, como a instalação de portos, usinas eólicas, indústrias, exploração mineral, pesca, infraestruturas militares, unidades de conservação, turismo e empreendimentos imobiliários.'},
+      {n:2,t:'As áreas definidas como terrenos de marinha são estratégicas para a exploração de recursos naturais como o sal marinho, o petróleo e o gás e, devido a sua fragilidade ambiental, são consideradas áreas restritas, nas quais é proibida a ocupação humana.'},
+      {n:3,t:'Os terrenos de marinha são extensões de terra ao longo da costa marítima ou próximas a rios, lagos e lagoas que sofrem a influência das marés oceânicas. No caso da costa marítima, esses terrenos correspondem a 33 metros contados a partir do mar em direção ao continente ou ao interior de ilhas costeiras.'},
+      {n:4,t:'Segundo a Constituição Federal de 1988, os terrenos de marinha podem ser públicos ou privados, garantindo o texto constitucional que as propriedades privadas definidas como terrenos de marinha sejam passíveis de demarcação, escrituração, venda, aluguel, doação ou herança.'},
+    ],answers:['C','E','C','E']},
+{id:26,session:'manha',area:'Geografia',
+ context:null,
+ instruction:'No que se refere às fronteiras e às formas de apropriação política do espaço geográfico, julgue (C ou E) os itens subsequentes.',
+ text:'Questão 26 — Fronteiras e Espaço Geográfico',
+ items:[
+      {n:1,t:'Segundo a teoria da mundialização, defendida a partir dos anos noventa do século XX, a queda das fronteiras e barreiras internacionais contribui para a ampliação do mercado globalizado de produtos e a reorganização das cadeias de produção em escala mundial.'},
+      {n:2,t:'A política de abertura de fronteiras tem garantido a livre circulação de mercadorias e pessoas, bem como favorecido o crescimento econômico, a reposição de mão de obra e a competitividade territorial em países-membros de blocos como o NAFTA, o MERCOSUL e a UE.'},
+      {n:3,t:'O bloco geoeconômico da UE é defensor da pauta política de abertura das fronteiras nacionais, dado o menor custo político e econômico desta estratégia em comparação com a estratégia de fechamento das fronteiras externas do bloco.'},
+      {n:4,t:'O crescimento de fluxos migratórios com origem em países do Sul em direção aos países do Norte global tem gerado políticas e medidas de restrição a livre circulação de pessoas e de controle de fronteira para barrar fluxos migratórios indesejáveis.'},
+    ],answers:['C','E','E','C']},
+{id:27,session:'manha',area:'Direito',
+ context:null,
+ instruction:'Considerando que o direito internacional se desenvolve, entre outros meios, pela elaboração de tratados internacionais e de decisões de tribunais internacionais, julgue (C ou E) os itens seguintes, a respeito do desenvolvimento do direito internacional contemporâneo.',
+ text:'Questão 27 — Direito Internacional Contemporâneo',
+ items:[
+      {n:1,t:'As intervenções de terceiros Estados em procedimentos contenciosos na Corte Internacional de Justiça (CIJ) têm aumentado em número, o que levou a Corte a ajustar suas regras de procedimento para intervenções de terceiros Estados.'},
+      {n:2,t:'Segundo o jurista brasileiro Antônio Augusto Cançado Trindade, verifica-se, no direito internacional contemporâneo, um retorno às teorias clássicas do direito internacional público, em processo histórico de humanização do direito internacional.'},
+      {n:3,t:'O acordo para conservação e uso sustentável da diversidade biológica marinha em áreas para além da jurisdição nacional (Acordo BBNJ) tem, como um de seus princípios norteadores, o princípio do patrimônio comum da humanidade, o qual já estava previsto na Convenção das Nações Unidas sobre o Direito do Mar (CNUDM).'},
+      {n:4,t:'O crescente recurso a instâncias judiciais internacionais estendeu-se, nos últimos anos, às questões atinentes à mudança do clima, com pedidos de opinião consultiva dirigidos à CIJ, ao Tribunal de Direito do Mar e à Comissão Interamericana de Direitos Humanos.'},
+    ],answers:['C','E','C','C']},
+{id:28,session:'manha',area:'Direito',
+ context:null,
+ instruction:'Julgue (C ou E) os seguintes itens, acerca dos princípios que regem o Brasil em suas relações internacionais.',
+ text:'Questão 28 — Princípios do Brasil nas Relações Internacionais',
+ items:[
+      {n:1,t:'O princípio da não intervenção, segundo o qual é direito de cada Estado soberano conduzir seus assuntos sem intervenção externa, foi reconhecido pela Assembleia Geral das Nações Unidas como condição essencial para a convivência pacífica entre as nações.'},
+      {n:2,t:'A aplicação do princípio da defesa da paz evidencia-se, entre outros meios, pela postura crítica do Brasil às tentativas de avanço das interpretações expansivas do direito à legítima defesa, previsto na Carta das Nações Unidas.'},
+      {n:3,t:'Conquanto adote como princípio a solução pacífica dos conflitos, o Brasil não pode ser acionado em contencioso perante a CIJ, visto que o país não apresentou declaração de reconhecimento de sua jurisdição compulsória.'},
+      {n:4,t:'O princípio da solução pacífica dos conflitos tem-se concretizado na crescente participação do Brasil em procedimentos perante tribunais internacionais, como o fez o país nos procedimentos de opiniões consultivas da CIJ relativas ao Kosovo, ao Arquipélago de Chagos e ao uso de armas nucleares.'},
+    ],answers:['C','E','C','E']},
+{id:29,session:'manha',area:'Direito',
+ context:null,
+ instruction:'Considerando a definição e os elementos constitutivos do Estado, julgue (C ou E) os itens a seguir.',
+ text:'Questão 29 — Elementos Constitutivos do Estado',
+ items:[
+      {n:1,t:'Os direitos de soberania do Estado costeiro sobre sua plataforma continental não afetam o regime jurídico das águas sobrejacentes.'},
+      {n:2,t:'No âmbito do direito internacional, é pacífico o entendimento de que os Estados que venham a perder integralmente seu território em razão da elevação do nível do mar sejam considerados extintos, dada a perda de um dos elementos constitutivos essenciais da condição de Estado.'},
+      {n:3,t:'Conforme decisão do Tribunal Penal Internacional (TPI), sua jurisdição se estende a crimes cometidos no território de Estado-parte no Estatuto de Roma, sendo desnecessário determinar a existência dos elementos essenciais para que este Estado-parte seja considerado Estado conforme o direito internacional geral.'},
+      {n:4,t:'Segundo posição adotada pelo Brasil no âmbito das discussões multilaterais sobre aplicação do direito internacional a tecnologias de informação e comunicação, a soberania do Estado estende-se ao uso dessas tecnologias.'},
+    ],answers:['C','E','C','C']},
+{id:30,session:'manha',area:'Direito',
+ context:null,
+ instruction:'Julgue (C ou E) os itens seguintes, acerca das imunidades diplomáticas, considerando as normas aplicáveis ao tema e a jurisprudência do STF acerca da matéria.',
+ text:'Questão 30 — Imunidades Diplomáticas',
+ items:[
+      {n:1,t:'Agente diplomático que exerça profissão liberal ou atividade comercial no Estado acreditado fora de suas funções oficiais pode ser processado na esfera civil e administrativa, podendo até sofrer medida de execução, a menos que tal medida venha a macular a inviolabilidade de sua pessoa ou de sua residência.'},
+      {n:2,t:'Ainda que deflagrado conflito armado entre dois países, permanece vigente a obrigação, firmada na Convenção de Viena sobre Relações Diplomáticas de 1961, segundo a qual o Estado acreditado deve respeitar e proteger os locais da missão diplomática, estendendo essa proteção aos bens e arquivos da missão.'},
+      {n:3,t:'Em razão da gravidade de atos imputados a agente diplomático ou a pessoas que gozam de imunidade diplomática, o Estado acreditante pode renunciar à imunidade de jurisdição desses indivíduos, e a efetivação dessa renúncia, no tocante a ações civis ou administrativas, implica renúncia automática à imunidade no que diz respeito às medidas de execução da sentença condenatória.'},
+      {n:4,t:'Nos termos da jurisprudência consolidada no STF, a imunidade de jurisdição da ONU não prevalece diante de causas de natureza trabalhista perante o Poder Judiciário brasileiro.'},
+    ],answers:['C','C','E','E']},
+{id:31,session:'manha',area:'Direito',
+ context:null,
+ instruction:'Acerca do uso da força no âmbito do direito internacional, julgue (C ou E) os seguintes itens.',
+ text:'Questão 31 — Uso da Força no Direito Internacional',
+ items:[
+      {n:1,t:'Segundo a Carta das Nações Unidas, o exercício do direito à legítima defesa por Estado-membro das Nações Unidas deve ser informado imediatamente ao Conselho de Segurança e restringe as ações desse órgão da ONU na tomada de providências para manter ou restabelecer a paz e a segurança internacionais.'},
+      {n:2,t:'Nos termos da Carta das Nações Unidas, a represália é uma das formas lícitas de o Estado agredido exercer seu direito à legítima defesa.'},
+      {n:3,t:'Com a evolução da prática e da doutrina internacionais relacionadas ao direito à legítima defesa consagrado na Carta das Nações Unidas, o conceito de legítima defesa preventiva passou a ser aceito por crescente número de países, inclusive pelo Brasil.'},
+      {n:4,t:'O Brasil, empenhado em criar zona de paz e cooperação em seu entorno geográfico, não integra qualquer acordo regional inspirado no artigo 51 da Carta das Nações Unidas, segundo o qual o exercício do direito inerente de legítima defesa contempla duas modalidades, a legítima defesa individual e a legítima defesa coletiva.'},
+    ],answers:['X','E','E','E']},
+{id:32,session:'manha',area:'Direito',
+ context:null,
+ instruction:'Em relação ao Tribunal Penal Internacional (TPI), ao Estatuto de Roma e às resoluções do CSNU, julgue (C ou E) os itens que se seguem.',
+ text:'Questão 32 — TPI, Estatuto de Roma e CSNU',
+ items:[
+      {n:1,t:'Uma das principais críticas de parte da doutrina ao Estatuto de Roma refere-se ao fato de o procurador do TPI não deter a iniciativa de abrir inquérito com base em informações sobre a prática de crimes da competência do tribunal, dependendo, para tanto, de anuência do Estado-parte ou de denúncia proveniente do Conselho de Segurança da ONU.'},
+      {n:2,t:'O TPI é o órgão judicial das Nações Unidas, de caráter permanente, responsável por julgar os crimes mais graves de transcendência internacional, tendo natureza complementar em relação às jurisdições penais nacionais.'},
+      {n:3,t:'Tanto a Resolução 1593 (2005), sobre a situação em Darfur, quanto a Resolução 1970 (2011), sobre a situação na Líbia, ambas adotadas pelo Conselho de Segurança da ONU com fundamento no Capítulo VII da Carta das Nações Unidas, estipulam que os gastos relacionados à investigação e à persecução penal advindos dessas decisões serão custeados pelas Nações Unidas.'},
+      {n:4,t:'O artigo 98.2 do Estatuto de Roma foi invocado de modo controverso em acordos bilaterais que tinham por objetivo pactuar a não entrega, sob nenhuma hipótese, de nacionais de país não parte do tribunal.'},
+    ],answers:['E','E','C','E']},
+{id:33,session:'manha',area:'Direito',
+ context:null,
+ instruction:'No que se refere ao direito internacional humanitário, julgue (C ou E) os itens subsequentes.',
+ text:'Questão 33 — Direito Internacional Humanitário',
+ items:[
+      {n:1,t:'Uma das normas básicas do Direito Internacional Humanitário, o princípio da distinção obriga os beligerantes a distinguir, em todas as circunstâncias, entre pessoas e bens civis, por um lado, e combatentes e objetivos militares, por outro lado, e os civis que temporariamente participem diretamente das hostilidades continuam amparados por essa norma fundamental.'},
+      {n:2,t:'De acordo com o princípio da proporcionalidade, ainda que determinado alvo de ataque seja militarmente legítimo, não deverá haver ataque se os danos civis colaterais forem desproporcionais ao ganho militar dele advindo.'},
+      {n:3,t:'A Convenção Internacional sobre a Proibição do Desenvolvimento, Produção, Estocagem e Uso de Armas Químicas, assinada em Paris, em 1993, baniu o emprego de tais armas, seu desenvolvimento, seu armazenamento e sua transferência, além de exigir a destruição dos arsenais, embora o cumprimento da última obrigação obedeça, via de regra, a discricionariedade de cada Estado-parte da convenção.'},
+      {n:4,t:'Embora a Corte Internacional de Justiça não tenha determinado, em sua Opinião Consultiva (1996), a licitude ou ilicitude do uso de armas nucleares, os efeitos indiscriminados das armas nucleares suscitam questionamentos quanto à sua compatibilidade com o direito internacional humanitário, especialmente no que tange aos princípios da distinção e da humanidade.'},
+    ],answers:['E','C','E','C']},
+{id:34,session:'tarde',area:'Língua Inglesa',
+ context:'Text I (Barbara Ehrenreich, The Humanoid Stain): Despite the tricky and life-threatening relationship between Paleolithic humans and the megafauna that comprised so much of their environment, twentieth-century scholars tended to claim cave art as evidence of an unalloyed triumph for our species. It was a great spiritual symbol, of a time when man had just emerged from a purely zoological existence, when instead of being dominated by animals, he began to dominate them. But the child-like and highly stylized stick figures found in caves do not radiate triumph. By the standards of our own time, they are excessively self-effacing and, compared to the animals portrayed around them, pathetically weak. While twentieth-century archeologists tended to solemnize prehistoric art as magico-religious or shamanic, today\'s more secular viewers sometimes detect a vein of sheer silliness. India\'s Mesolithic rock art portrays few human stick figures; those that are portrayed have been described by modern viewers as comical, animalized and grotesque.',
+ instruction:'Based on text I, judge whether the following statements are right (C) or wrong (E).',
+ text:'Questão 34 — Text I: Cave Art and Paleolithic Humans',
+ items:[
+      {n:1,t:'The text stresses the difference between the opinions of cave artists and of modern art scholars in terms of the concept of the artistic genius.'},
+      {n:2,t:'The author sides with those who take cave art to be a great spiritual symbol, as stated in the first paragraph.'},
+      {n:3,t:'The text suggests that 20th-century scholars had an erroneous perspective on how cave art should be viewed.'},
+      {n:4,t:'The author concludes that cave artists depicted humans as weak to show the preponderance megafauna had in those days.'},
+    ],answers:['E','C','E','E']},
+{id:35,session:'tarde',area:'Língua Inglesa',
+ context:null,
+ instruction:'Judge whether the following items about text I are right (C) or wrong (E).',
+ text:'Questão 35 — Text I: Grammar and Vocabulary',
+ items:[
+      {n:1,t:'In the last sentence of the text, inserting a comma immediately after the first occurrence of that would make the sentence grammatically incorrect.'},
+      {n:2,t:'In the expressions unalloyed triumph (first sentence of the text) and sheer silliness (first sentence of the second paragraph), the adjectives unalloyed and sheer convey similar meanings.'},
+      {n:3,t:'The last sentence of the second paragraph could be rewritten, maintaining its original meaning and correctness, as: Accordingly, Judith Thurman has already written that cave artists, notwithstanding their respect for naturalistic portraits, have an aversion to painting human beings with traces of crudeness, which suggests mockery.'},
+      {n:4,t:'By stating that the human figures in cave art are self-effacing (last sentence of the first paragraph), the author means that humans were virtually absent characters in cave paintings.'},
+    ],answers:['C','E','E','C']},
+{id:36,session:'tarde',area:'Língua Inglesa',
+ context:'Text II (E. H. Gombrich, The Story of Art): This book wants to show the newcomer the lie of the land without confusing him with details. In writing it I thought first and foremost of readers in their teens. But I have never believed that books for young people should differ from books for adults except for the fact that they must reckon with the most exacting class of critics, critics who are quick to detect and resent any trace of pretentious jargon or bogus sentiment. I know from experience that these are the vices which may render people suspicious of all writings. I have striven to use plain language even at the risk of sounding casual or unprofessional.',
+ instruction:'Considering text II, judge whether the following statements are right (C) or wrong (E).',
+ text:'Questão 36 — Text II: Gombrich (The Story of Art)',
+ items:[
+      {n:1,t:'As used in the third sentence of the first paragraph, the expression most exacting class of critics refers to critics who worry too much about being correct.'},
+      {n:2,t:'In the fragment most exacting class of critics, critics who are quick to... (third sentence of the first paragraph), omitting the second occurrence of the word critics would maintain the grammar correctness of the sentence.'},
+      {n:3,t:'By stating that he wants to show the reader the lie of the land (first sentence of the text), the author means that he wants to inform the reader of the rules he followed in writing the book.'},
+      {n:4,t:'In the fragment I have never believed that books for young people should differ from books for adults except for the fact that they must reckon with the most exacting class of critics (third sentence of the first paragraph), the referent for the pronoun they is adults.'},
+    ],answers:['E','C','E','E']},
+{id:37,session:'tarde',area:'Língua Inglesa',
+ context:null,
+ instruction:'Based on text II, judge whether the following statements are right (C) or wrong (E).',
+ text:'Questão 37 — Text II: Vocabulary and Inference',
+ items:[
+      {n:1,t:'In the last sentence of the text, the word dog has a similar meaning to trouble.'},
+      {n:2,t:'The excerpt lest the well-known masterpieces be crowded out by my own personal favourites (second sentence of the second paragraph) could be, maintaining the coherence and correctness of the original, correctly replaced with to avoid leaving the well-known masterpieces out to fill the book with my own personal favourites.'},
+      {n:3,t:'It can be correctly concluded from the excerpt Praise is so much duller than criticism (ninth sentence of the first paragraph) that the author wishes to write a book criticizing what he considers monstrosities.'},
+      {n:4,t:'In for them the familiar appearance (third sentence of second paragraph), them refers to the people the book is meant for: those who look for bearings in a new field.'},
+    ],answers:['C','C','E','C']},
+{id:38,session:'tarde',area:'Língua Inglesa',
+ context:'Text III (Inis L. and Claude Jr., Swords into Plowshares): Aside from the difficulties of operating a decidedly multinational staff organization, once it is formed, the problem of reconciling the principle of equitable geographical distribution of recruits with that of securing the highest standards of efficiency, competence, and integrity is a formidable one. This delicate task was politically imposed upon the League of Nations secretary-general, and is constitutionally required of his counterpart in the United Nations. For better or for worse, recruitment policy cannot be based exclusively upon the criterion of the individual\'s personal qualifications; in the field of international employment, the relevant irrelevancy is not whom do you know but where are you from?',
+ instruction:'Regarding text III, judge whether the following statements are right (C) or wrong (E).',
+ text:'Questão 38 — Text III: International Organizations and Recruitment',
+ items:[
+      {n:1,t:'The author of the text considers that, more than the competence of the applicants or their nationality, it is their political connections — who they know — that has the greatest impact on their chance of being recruited for international jobs.'},
+      {n:2,t:'According to the text, reconciling the principle of equitable geographical distribution of recruits with that of securing the highest standards of efficiency, competence, and integrity was a legal obligation incumbent both on the Secretary-General of the League of Nations and the Secretary-General of the United Nations.'},
+      {n:3,t:'The fragment even at the expense of sheer quality (last sentence of the second paragraph) could be, without harming the coherence of the text, replaced with even if this entails the choice of less qualified applicants.'},
+      {n:4,t:'The excerpt It licenses a kind of international spoils system could be, without altering the meaning of the sentence, replaced with It spoils the international system.'},
+    ],answers:['E','C','C','E']},
+{id:39,session:'tarde',area:'Língua Inglesa',
+ context:'Text IV (C. P. Snow, Corridors of Power): In the middle of July, Roger was making his first ministerial speech. I did not need reminding, having drafted enough of them, how much speeches mattered — to parliamentary bosses, to any kind of tycoon. Draft after draft: the search for the supreme, the impossible, the more than Flaubertian perfection; the scrutiny for any phrase that said more than it ought to say, so that each speech at the end was bound, by the law of official inexplicitness, to be more porridge-like than when it started out in its first draft. I had always hated writing drafts for other people, and nowadays got out of it.',
+ instruction:'Considering the grammatical and semantic aspects of text IV, judge whether the following statements are right (C) or wrong (E).',
+ text:'Questão 39 — Text IV: Grammar and Semantics (C.P. Snow)',
+ items:[
+      {n:1,t:'In the third sentence of the text, supreme is an adjective modifying the noun perfection.'},
+      {n:2,t:'The text suggests that, when their original drafts were modified by a minister, Hector and Douglas would stand up to him and insist on retaining the sharp, clear English of the original.'},
+      {n:3,t:'In the first sentence of the text, the verb making is being used with the sense of writing.'},
+      {n:4,t:'The narrator of the text considers that the process of rewriting the speech multiple times contributes to its becoming more focused and direct.'},
+    ],answers:['X','E','E','C']},
+{id:40,session:'tarde',area:'Língua Inglesa',
+ context:'Text V (UNDP, adapted): Urbanization is one of the defining trends of this century and a key driver of development. By 2050, around 70% of the world\'s population will be living in cities and towns. Asia and Africa will collectively account for a significant majority of the urban growth rate. Today, cities produce around 80% of the global GDP. Cities also use 75% of global energy and are responsible for 70% of global carbon emissions. However, cities today face numerous vulnerabilities and threats. Without proper planning, policies, and support, urbanization often leads to unnecessary risks and costs, preventing cities from reaching their full potential.',
+ instruction:'Based on text V, judge whether the following statements are right (C) or wrong (E).',
+ text:'Questão 40 — Text V: Urbanization (UNDP)',
+ items:[
+      {n:1,t:'It can be inferred that the more urban expansions and proliferation of informal settlements are created, the more problems the communities nearby will face in terms of provision of public services.'},
+      {n:2,t:'To ensure equal and inclusive access to services and create urban spaces that improve livability, cities should be developed by citizens aiming to fully realize their potential.'},
+      {n:3,t:'Due to the amount of global GDP produced by cities, the article shows how important it is for cities to continue growing to help the urbanization process.'},
+      {n:4,t:'Despite the many vulnerabilities and threats cities encounter, it is reasonable to conclude that with effective planning, policies, and adequate support, urbanization can avoid unnecessary risks and costs, enabling cities to achieve their full potential.'},
+    ],answers:['C','E','E','C']},
+{id:41,session:'tarde',area:'História do Brasil',
+ context:null,
+ instruction:'Em relação à economia e à sociedade da América portuguesa, julgue (C ou E) os itens a seguir.',
+ text:'Questão 41 — América Portuguesa: Economia e Sociedade',
+ items:[
+      {n:1,t:'Tendo reconhecido o Tratado de Tordesilhas, a França negociou com Portugal parcerias comerciais para a exploração conjunta da Guanabara (século XVI) e do Maranhão (século XVII), sem ameaçar a posse das terras brasileiras pelo colonizador luso.'},
+      {n:2,t:'Apesar de a escravidão indígena ter sido proibida pela legislação portuguesa, comunidades indígenas foram escravizadas pelos colonizadores com base nas exceções da lei, a exemplo do ocorrido durante as chamadas guerras justas.'},
+      {n:3,t:'No século XVII, a presença holandesa nas capitanias do norte contribuiu para a diversificação da economia da região, o que se comprovou pelo crescimento das atividades de criação de caprinos e bovinos.'},
+      {n:4,t:'No curso dos primeiros cinco anos após a chegada dos portugueses ao Brasil, a Coroa portuguesa arrendou o litoral brasileiro a um consórcio de comerciantes lisboetas, com o intuito de iniciar e expandir a exploração do novo território e nele construir uma feitoria.'},
+    ],answers:['X','C','E','C']},
+{id:42,session:'tarde',area:'História do Brasil',
+ context:null,
+ instruction:'Acerca do período da Primeira República no Brasil, julgue (C ou E) os itens seguintes.',
+ text:'Questão 42 — Primeira República',
+ items:[
+      {n:1,t:'O Manifesto Antropófago, de Oswald de Andrade, tematizou a tensão entre culturas ameríndias e africanas e a cultura europeia, diferenciando-se assim das proposições assimilacionistas do indigenismo romântico do século XIX.'},
+      {n:2,t:'Nesse período, era comum a prática da degola, que consistia em o candidato eleito ser rejeitado pela comissão de verificação da Câmara dos Deputados.'},
+      {n:3,t:'No âmbito econômico-financeiro, houve nesse período uma mudança significativa nas relações internacionais do Brasil, o que pode ser ilustrado pelo fato de o valor das importações provenientes dos Estados Unidos da América ter ultrapassado o das importações advindas da Grã-Bretanha.'},
+      {n:4,t:'O movimento do cangaço, que se alastrou nos sertões do Nordeste, contrapunha-se às práticas políticas locais, tendo seus líderes rejeitado qualquer tipo de aliança com os coronéis.'},
+    ],answers:['X','C','E','C']},
+{id:43,session:'tarde',area:'História do Brasil',
+ context:null,
+ instruction:'Julgue (C ou E) os itens subsequentes, relativos à vida política e social brasileira na primeira metade do século XIX.',
+ text:'Questão 43 — Brasil no Século XIX',
+ items:[
+      {n:1,t:'A Lei de Terras de 1850 não só criou condições para atrair imigrantes ao país, tendo facilitado a compra de propriedades rurais por estrangeiros, como também estabeleceu um projeto de colonização voltado para os libertos no intuito de diminuir a presença destes nas cidades.'},
+      {n:2,t:'Formulada por um membro do Partido Conservador, a ideia de que às vozes mesquinhas das localidades devia-se sobrepor a voz da razão nacional ilustra a motivação das reações contrárias ao Ato Adicional de 1834.'},
+      {n:3,t:'No conflito de preeminência entre a assembleia constituinte/legislativa instalada em 1823 e o imperador, a Constituição outorgada em 1824 significou, sobretudo, a fragilização do poder centralizador exercido pelos monarcas da Casa de Bragança.'},
+      {n:4,t:'A separação política entre Brasil e Portugal em 1822 não foi imediatamente aceita em todo território nacional, pois os chefes de províncias resistiram com o apoio de tropas portuguesas, no Norte, no Mato Grosso e na Cisplatina.'},
+    ],answers:['E','C','E','X']},
+{id:44,session:'tarde',area:'História do Brasil',
+ context:null,
+ instruction:'A respeito da Cabanagem, julgue (C ou E) os itens seguintes.',
+ text:'Questão 44 — A Cabanagem',
+ items:[
+      {n:1,t:'A significativa participação de escravizados na revolta fez prevalecer, como senso comum, a associação dos membros do movimento ao mal, assim como despertou na sociedade da época o medo de que ocorresse no país o que se passara no Haiti.'},
+      {n:2,t:'O movimento pregava o fim da regência com o estabelecimento de uma república a exemplo das ex-colônias espanholas.'},
+      {n:3,t:'Após longos confrontos com as tropas legalistas, a rebelião foi controlada, ao custo da destruição de Belém e de sua economia, bem como da dizimação de cerca de 1/5 da população estimada da província.'},
+      {n:4,t:'Além de tapuios, negros e indígenas, integraram majoritariamente a Cabanagem os cabanos, daí o nome dado à revolta.'},
+    ],answers:['E','X','C','C']},
+{id:45,session:'tarde',area:'História do Brasil',
+ context:null,
+ instruction:'Em relação às duas primeiras décadas do século XX, bem como ao processo que levou Getúlio Vargas à Presidência do Brasil em 1930, julgue (C ou E) os itens a seguir.',
+ text:'Questão 45 — Revolução de 1930 e Getúlio Vargas',
+ items:[
+      {n:1,t:'O chamado Bloco Operário e Camponês teve grande importância nos acontecimentos de 1930, evidenciada no apoio dado pelo Partido Comunista à revolução capitaneada por Getúlio Vargas, visto então como carrasco da burguesia nacional.'},
+      {n:2,t:'Os oficiais, sobretudo tenentes e capitães, que, nos anos 20 do século XX, inconformados com as práticas dos políticos da República Velha, forneceram apoio à ascensão de Getúlio Vargas eram uniformemente alinhados com um liberalismo radical, cujos valores centrais consistiam no voto direto, no sufrágio universal e no Estado mínimo.'},
+      {n:3,t:'Com a indicação, pelo presidente Washington Luís, de Júlio Prestes como seu sucessor, a eleição de 1930 marcou o rompimento da política dos governadores.'},
+      {n:4,t:'Inicialmente em posição neutra, o Brasil, em 1917, declarou estado de guerra contra o Império Alemão, chegando, em seguida, a enviar combatentes para lutar ao lado dos Aliados no front da Primeira Guerra Mundial.'},
+    ],answers:['E','X','C','C']},
+{id:46,session:'tarde',area:'História do Brasil',
+ context:null,
+ instruction:'Em relação à Era Vargas, julgue (C ou E) os itens seguintes.',
+ text:'Questão 46 — Era Vargas',
+ items:[
+      {n:1,t:'Durante o período do Estado Novo, a música era considerada importante elemento educativo e o samba recebeu especial destaque, tendo o Departamento de Imprensa e Propaganda do governo Vargas passado a promover artistas e peças musicais que exaltavam o homem trabalhador e a família.'},
+      {n:2,t:'A política de valorização do café, que marcou a República Velha, foi reconfigurada no primeiro governo Vargas e incluiu proteção à cafeicultura paulista (compra pelo governo de parte da produção), queima de estoques de baixa qualidade bem como atuação da diplomacia brasileira na abertura de mercados na Europa e isenção tarifária à importação pelos Estados Unidos da América.'},
+      {n:3,t:'A adoção de planejamento econômico durante o Estado Novo resultou em controle do custo de vida, o que beneficiou a classe trabalhadora e fortaleceu o apoio popular ao governo de Vargas.'},
+      {n:4,t:'O anticomunismo justificou a aprovação de peças legais que restringiram a efetividade da Constituição de 1934, entre as quais se destacaram a Lei de Segurança Nacional, sancionada em abril de 1935, e três emendas constitucionais aprovadas em dezembro desse mesmo ano.'},
+    ],answers:['C','C','E','C']},
+{id:47,session:'tarde',area:'História do Brasil',
+ context:null,
+ instruction:'A respeito da República Liberal (1945-1964), julgue (C ou E) os itens a seguir.',
+ text:'Questão 47 — República Liberal (1945-1964)',
+ items:[
+      {n:1,t:'A Constituição de 1946 reconheceu a educação básica como direito, estabeleceu a gratuidade do ensino primário, bem como definiu os percentuais da arrecadação fiscal que deveriam ser investidos no setor educacional pela União, estados e municípios.'},
+      {n:2,t:'Em 1963, a repressão comandada por João Goulart à insurreição dos suboficiais ampliou o apoio dado ao governo pelos oficiais legalistas que haviam se oposto às tentativas de golpe ocorridas desde o final do segundo governo Vargas.'},
+      {n:3,t:'Mudaram a experiência política brasileira a partir de 1945: a instituição da obrigação de abrangência nacional na organização dos partidos políticos, maior inserção da sociedade civil no debate político e o estabelecimento do voto secreto.'},
+      {n:4,t:'Nesse período, o incremento da urbanização do Brasil vinculava-se, por um lado, ao acelerado processo de industrialização nas grandes cidades e, por outro, aos esforços estatais de ocupação e povoamento do interior do país.'},
+    ],answers:['E','C','C','E']},
+{id:48,session:'tarde',area:'História do Brasil',
+ context:null,
+ instruction:'Considerando o período do Regime Militar no Brasil, julgue (C ou E) os itens a seguir.',
+ text:'Questão 48 — Regime Militar no Brasil',
+ items:[
+      {n:1,t:'Denunciado à Comissão de Direitos Humanos da ONU no relatório da Anistia Internacional de 1972, o Brasil foi impedido de participar como membro daquela comissão até a abertura política do país, em meados da década de 80 do século XX.'},
+      {n:2,t:'A Constituição de 1967 restabeleceu a pena de morte no Brasil para condenados por guerra revolucionária ou subversiva.'},
+      {n:3,t:'A tese do pragmatismo responsável da política exterior do Brasil durante o Regime Militar baseava-se na autonomia do Itamaraty frente às questões internas.'},
+      {n:4,t:'Os conceitos de segurança nacional e de inimigo interno, desenvolvidos na Escola Superior de Guerra, foram importantes elementos de legitimação do regime instaurado em 1964 e subsidiaram o expurgo de mais de uma centena de oficiais das Forças Armadas.'},
+    ],answers:['X','C','E','C']},
+{id:49,session:'tarde',area:'História do Brasil',
+ context:null,
+ instruction:'Julgue (C ou E) os itens a seguir, relacionados à experiência democrática após o Regime Militar no Brasil.',
+ text:'Questão 49 — Redemocratização',
+ items:[
+      {n:1,t:'O modelo presidencialista bicameral e multipartidário com sistema eleitoral proporcional por lista aberta, aprovado pela Constituição de 1988 e reafirmado com o Plebiscito de 1993, tem regido a República brasileira em suas experiências democráticas desde a Constituição de 1934.'},
+      {n:2,t:'A baixa complementaridade econômica, assimetrias políticas e sociais e limitações nas estruturas estatais e burocráticas dos países-membros do MERCOSUL são obstáculos para a efetivação de acordos de integração no bloco econômico.'},
+      {n:3,t:'A elaboração de uma nova Constituição Federal, objetivo apresentado na convocação para a formação da Assembleia Constituinte, foi entendida pelas elites políticas brasileiras como etapa fundamental para a finalização da transição para o regime democrático.'},
+      {n:4,t:'Entre os anos 2002 e 2013, a política externa brasileira retomou aspectos da Política Externa Independente (PEI), com a vinculação entre relações internacionais e desenvolvimento interno, aprofundou a cooperação Sul-Sul e atuou na constituição de novos blocos econômicos, como o G-20.'},
+    ],answers:['C','C','E','C']},
+{id:50,session:'tarde',area:'História Mundial',
+ context:'A ênfase, portanto, incide mais sobre o profundo do que sobre o rápido. Não surpreenderá ninguém que os extraordinários avanços tecnológicos da grande Revolução Industrial não fossem realizados da noite para o dia. Poucas invenções surgem maduras no mundo. Pelo contrário: precisa-se de uma série de pequenos grandes aperfeiçoamentos para que uma ideia se converta numa técnica. (David S. A. Landes. A riqueza e a pobreza das nações.)',
+ instruction:'Julgue (C ou E) os itens a seguir, relativos à Revolução Industrial e ao seu contexto histórico.',
+ text:'Questão 50 — Revolução Industrial e Contexto Histórico',
+ items:[
+      {n:1,t:'Secundário em relação ao liberalismo, o colonialismo não teve impacto imediato na política e na economia do século XIX.'},
+      {n:2,t:'Segundo historiadores e pensadores, a concepção de nacionalismo e, principalmente, de nação engloba a consideração da existência de uma comunidade imaginada como intrinsecamente limitada e, simultaneamente, soberana.'},
+      {n:3,t:'Desigual e demorada em seus efeitos no quadro geral dos povos e nações onde se instalou, a Revolução Industrial promoveu o surgimento de novas profissões em substituição a antigas.'},
+      {n:4,t:'Com o advento da Revolução Industrial, o uso econômico do tempo foi rapidamente assimilado pelos trabalhadores das fábricas e dos demais setores produtivos, tendo os aspectos culturais e as formas de execução de tarefas do cotidiano se adequado simultaneamente às novas exigências laborais do capitalismo incipiente.'},
+    ],answers:['E','C','C','E']},
+{id:51,session:'tarde',area:'História Mundial',
+ context:null,
+ instruction:'Em relação à Revolução Francesa, a seus desdobramentos e às demais revoluções posteriores a ela até as primeiras décadas do século XX, julgue (C ou E) os itens subsequentes.',
+ text:'Questão 51 — Revolução Francesa e Revoluções Posteriores',
+ items:[
+      {n:1,t:'A Revolução Russa, liderada por Lênin nas primeiras décadas do século XX, foi inspirada na história e no curso dos acontecimentos da Revolução Francesa, mas não nos homens que a lideraram.'},
+      {n:2,t:'A Revolução Francesa foi pensada, motivada e conduzida por pensadores iluministas e pela alta burguesia, sendo eles os grandes grupos que arquitetaram e executaram esse movimento.'},
+      {n:3,t:'Os movimentos de independência nas regiões insurgentes da América espanhola foram majoritariamente motivados pela quebra do pacto tradicional, traço característico daquelas sociedades, e não por ideias e práticas políticas novas que vigoravam à época na Europa.'},
+      {n:4,t:'Desde a primeira fase da Revolução Francesa, o cenário político francês passou a ser dominado por dois grupos partidários — os jacobinos e os girondinos —, tendo sido o povo excluído dos processos revolucionários e das práticas políticas.'},
+    ],answers:['E','C','E','E']},
+{id:52,session:'tarde',area:'História Mundial',
+ context:'Por volta do final de abril, tudo se agravara. A fermentação transformara-se em fervura. Desde 1830, aqui e ali ocorriam pequenas rebeliões parciais, rapidamente sufocadas, mas recorrentes, sinal de vasta conflagração subjacente. (Victor Hugo. Os miseráveis.)',
+ instruction:'Julgue (C ou E) os itens seguintes, relativos a acontecimentos da história contemporânea.',
+ text:'Questão 52 — História Contemporânea',
+ items:[
+      {n:1,t:'A participação feminina em premiações internacionais no alvorecer do século XX não conseguiu superar a representação das mulheres como peças funcionais na família e na sociedade; prova disso é que, entre 1901 e 1914, quando a Fundação Prêmio Nobel começou a premiar personalidades no campo científico, apenas por quatro vezes as mulheres foram agraciadas.'},
+      {n:2,t:'Durante os anos do apogeu do liberalismo clássico, ocorrido antes de 1914, o volume do comércio mundial dobrava a cada 20 ou 25 anos, ao passo que, após a Segunda Guerra Mundial, o volume do comércio mundial passou a dobrar a uma velocidade muito menor, em torno de três a quatro décadas.'},
+      {n:3,t:'As transformações técnicas e dos modos de vida que caracterizaram o período da Revolução Industrial entre 1875 e 1890 favoreceram o crescimento de correntes políticas apoiadas na democracia das massas, que, adiante, no século XX, estiveram integradas tanto ao nacionalismo quanto ao socialismo.'},
+      {n:4,t:'Posteriormente à década de 70 do século XX, a riqueza no mundo atingiu altos patamares, o que possibilitou o aumento exponencial do financiamento de atividades culturais e artísticas, tendo sido, entretanto, toda essa riqueza global direcionada para o setor privado em detrimento das receitas públicas.'},
+    ],answers:['E','X','C','E']},
+{id:53,session:'tarde',area:'História Mundial',
+ context:'Ao estudioso das relações internacionais o principal foco está na interpretação do sentido e das implicações decorrentes dos fatos visíveis em dados ou em imagens transmitidas pelos noticiários. Pode-se pensar na questão como uma espécie de jogo de Lego: os acontecimentos, os fatos, os dados contidos em relatórios seriam como peças postas em uma caixa, mas a capacidade de reunir essas peças para formar figuras vai depender de recursos teóricos que permitam interpretar o significado e as conexões possíveis das peças. (Raphael Spode e Gabriel G. Xavier)',
+ instruction:'Julgue (C ou E) os itens a seguir, referentes ao período entre as duas guerras mundiais, à Segunda Guerra Mundial e a declarações da ONU.',
+ text:'Questão 53 — Entre Guerras, Segunda Guerra e ONU',
+ items:[
+      {n:1,t:'A forma como o Saara Ocidental foi deixado pelo governo espanhol conforma-se aos termos da Carta da ONU, na declaração relativa a territórios sem governo próprio, já que os povos daquele território tinham plena capacidade de se governarem.'},
+      {n:2,t:'No período entre as duas grandes guerras mundiais, os únicos países europeus com instituições políticas adequadamente democráticas que funcionaram sem interrupção foram a Grã-Bretanha, a Finlândia, o Estado Livre Irlandês, a Suécia e a Suíça.'},
+      {n:3,t:'Segundo o economista John Maynard Keynes, após a Primeira Guerra Mundial, sem a restauração da economia alemã, era impossível a recomposição de uma civilização e economia liberais estáveis na Europa, pensamento que influenciou os franceses a tolerar uma política de realização alemã após 1924, o que terminou por enfraquecer a economia na Alemanha.'},
+      {n:4,t:'A Alemanha, após ter declarado guerra à URSS em 1941, não poderia manter uma guerra longa, pois, apesar de seus esforços, produzia bem menos aviões que seus rivais; depois da bem-sucedida ofensiva alemã contra as regiões do Cáucaso e do baixo Volga, as tropas germânicas foram detidas em Stalingrado.'},
+    ],answers:['E','C','E','C']},
+{id:54,session:'tarde',area:'História Mundial',
+ context:null,
+ instruction:'Considerando os desdobramentos históricos relacionados à Guerra Fria, julgue (C ou E) os itens subsecutivos.',
+ text:'Questão 54 — Guerra Fria',
+ items:[
+      {n:1,t:'Um dos pontos centrais da convenção Bretton Woods, realizada em 1944 com o objetivo de evitar os erros das políticas econômicas dos anos 30 que culminaram na grande depressão, foi o compromisso firmado em prol da conversão das moedas europeias para o euro.'},
+      {n:2,t:'Assim como ocorrera com a Holanda, que, após a Segunda Guerra Mundial, viu a Indonésia lutar e conseguir sua independência, as demais potências coloniais e ex-coloniais do oeste europeu passaram a dedicar sua total atenção às questões europeias e abandonaram as antigas prioridades de manter o domínio e o controle das respectivas colônias.'},
+      {n:3,t:'Na América do Sul, a aplicação da política econômica internacional conhecida como Consenso de Washington resultou em medidas que, algumas décadas depois, implicaram a adoção, pelos presidentes da Argentina e do Brasil, de políticas que modificassem os padrões das reformas liberais, indo contra as teses que embasaram o referido consenso.'},
+      {n:4,t:'Paralelamente às consequências econômicas e políticas do colapso da URSS e da Europa Oriental, as ricas economias do capitalismo trataram a crise de forma urgente e maciça, tendo o fim da Guerra Fria sido considerado o fim de um conflito, e não o fim de uma era.'},
+    ],answers:['E','C','C','E']},
+{id:55,session:'tarde',area:'História Mundial',
+ context:'No dia 18 de janeiro de 1871, por volta do meio-dia, ocorreu a proclamação do Império Alemão. O evento foi celebrado em uma luxuosa e solene cerimônia na Galeria dos Espelhos, um dos maiores salões do Palácio de Versalhes, na França. Naquela ocasião, o rei Guilherme I da Prússia tornou-se, aos 73 anos de idade, Kaiser Guilherme, com o desafio de unir todos os alemães em um único Estado.',
+ instruction:'Em relação ao Império Alemão, julgue (C ou E) os itens a seguir.',
+ text:'Questão 55 — Império Alemão (1871)',
+ items:[
+      {n:1,t:'No Reichstag, a câmara baixa do parlamento alemão, atuavam todos os eleitos como representantes do povo e, a fim de proteger o poder absoluto do Kaiser, o chanceler Otto von Bismarck tentou evitar que o Reichstag tivesse muito poder, mas, por meio da influência política dos junkers, o Reichstag assegurou a sua iniciativa legislativa e a impossibilidade de sua dissolução pelo Kaiser.'},
+      {n:2,t:'A fim de assegurar a isonomia política interna, o parlamento alemão tinha uma câmara alta, o Bundesrat, onde os vinte e cinco estados alemães, os chamados Länder, tinham a mesma quantidade de representantes e votos.'},
+      {n:3,t:'A escolha do Palácio de Versalhes como local da proclamação do Império Alemão foi uma forma de evitar o comprometimento da então frágil unidade alemã.'},
+      {n:4,t:'O Império Alemão tornou-se uma potência industrial e naval nas décadas seguintes a sua formação, tendo colapsado apenas ao final da Primeira Guerra Mundial.'},
+    ],answers:['X','E','C','C']},
+{id:56,session:'tarde',area:'História Mundial',
+ context:'Em 29 de maio de 1913, estreou, na cidade de Paris, no Théâtre des Champs Élysées, o aguardado espetáculo de balé Le sacre du printemps (A sagração da primavera), que marcou para sempre a vida cultural do século XX, especialmente pela reação do público, que se dividiu, assim que os primeiros compassos foram ouvidos, entre aplausos entusiasmados de aprovação e gritos de protesto.',
+ instruction:'A respeito do espetáculo mencionado no texto precedente e do contexto político e social da época, julgue (C ou E) os itens a seguir.',
+ text:'Questão 56 — Le Sacre du Printemps (1913)',
+ items:[
+      {n:1,t:'A Sagração da primavera é considerada, na historiografia e na história da arte, o ápice do movimento surrealista, caracterizado pela subversão do movimento síncrono, pela estética eclética, pelo informalismo pictórico e, sobretudo, pela reação ao racionalismo e ao realismo do século XIX.'},
+      {n:2,t:'A Sagração da primavera foi uma produção da companhia russa Ballets Russes, liderada pelo empresário russo Serguei Diaghilev e construída com a colaboração de grandes artistas, como Igor Stravinsky e Romola Nijinsky.'},
+      {n:3,t:'O interesse de muitos franceses pela cultura russa explica-se, em grande medida, pela aliança franco-russa concluída em 1892 e em vigor a partir de 1893, a qual produziu, especialmente em Paris, celebração da arte e da corte russa.'},
+      {n:4,t:'A reação negativa de parte do público à apresentação do referido espetáculo de balé pode ser atribuída a seu caráter disruptivo: os diálogos eram em russo, a música era conduzida por um coral formado de jovens com vozes estridentes, a bailarina principal usava roupas masculinas e ao palco foram levados animais, o que foi interpretado como desrespeito e imoralismo pela burguesia parisiense.'},
+    ],answers:['X','E','C','E']},
+{id:57,session:'tarde',area:'História Mundial',
+ context:null,
+ instruction:'Acerca do colonialismo, do imperialismo e das políticas de dominação nos séculos XIX e XX, julgue (C ou E) os itens seguintes.',
+ text:'Questão 57 — Colonialismo e Imperialismo',
+ items:[
+      {n:1,t:'Ao realizarem a Conferência de Berlim, entre o final de 1884 e o início de 1885, as potências europeias concentraram esforços para constituir um instrumento legal que, ao mesmo tempo, garantisse a exploração europeia da África e respeitasse a diversidade cultural, linguística, religiosa, étnica e política dos povos locais.'},
+      {n:2,t:'A Conferência de Bandung, realizada no contexto do pós-Segunda Guerra Mundial, foi pioneira ao reunir países do nascente Terceiro Mundo interessados em acelerar o processo de descolonização e construir estratégias de autonomia relativa frente às grandes potências globais.'},
+      {n:3,t:'O incremento de tarifas protecionistas na Europa ao final do século XIX não só transformou economias nacionais em economias rivais, como também explicitou a convergência entre política e economia por meio da ação do Estado, o que estimulou a corrida neocolonial.'},
+      {n:4,t:'Uma das concepções de mundo dominante na elite europeia do último terço do século XIX, o darwinismo social foi adotado para combater tanto o ideal de livre concorrência nos mercados internos quanto as lutas externas imperialistas das nações do velho continente.'},
+    ],answers:['E','C','C','E']},
+{id:58,session:'tarde',area:'História Mundial',
+ context:null,
+ instruction:'Julgue (C ou E) os próximos itens, concernentes a ideologias circulantes nos séculos XIX e XX bem como aos regimes políticos em tais séculos.',
+ text:'Questão 58 — Ideologias e Regimes Políticos (XIX-XX)',
+ items:[
+      {n:1,t:'O keynesianismo emergiu com a crise liberal que se instalou no pós-1929, tomou corpo com o new deal de Franklin Roosevelt e com outras políticas do welfare state e ganhou mais força com o empenho de reconstrução da economia europeia no pós-1945, tendo, porém, se enfraquecido com as proposições de Milton Friedman e a supremacia neoliberal das duas últimas décadas do século passado.'},
+      {n:2,t:'Na Confederação Germânica de meados do século XIX, o processo de unificação nacional, comandado pelo prussiano Otto von Bismarck, se deu sob a orientação do projeto liberal-democrático, herdeiro ideológico das revoluções de 1848.'},
+      {n:3,t:'O regime de Vichy, que vigorou na França durante a Segunda Guerra Mundial, foi marcado por seu caráter antifascista e antiditatorial, evidente, sobretudo, na simpatia de Philippe Pétain pela causa dos que resistiam à ocupação alemã do território francês.'},
+      {n:4,t:'A ideologia comunista, em sua versão marxista-leninista, e a fascista, em suas formas italiana e alemã, atualizaram um tema clássico da cultura política europeia: a crítica da abstração democrática moderna, em nome da antiga sociedade orgânica, pela direita, e da futura sociedade socialista, pela esquerda.'},
+    ],answers:['X','E','E','C']},
+{id:59,session:'tarde',area:'Economia',
+ context:'A presidência brasileira no BRICS será exercida em um contexto internacional marcado, entre outras discussões, pelo debate de parte dos países em desenvolvimento em torno do papel do dólar nas transações internacionais.',
+ instruction:'Julgue (C ou E) os itens a seguir, relativos às funções da moeda e ao papel da autoridade monetária.',
+ text:'Questão 59 — Funções da Moeda e Autoridade Monetária',
+ items:[
+      {n:1,t:'A gestão da autoridade monetária sobre os investimentos das reservas internacionais não é afetada pelos níveis de juros nem pelas paridades das moedas de investimento contra a moeda numerário de reserva de valor.'},
+      {n:2,t:'O domínio do dólar durante grande parte dos últimos 75 anos é considerado, por alguns economistas, uma anomalia histórica, já que, antes do padrão-ouro, a prata, o ouro e os blocos bimetálicos coexistiam e interagiam; no período entre as duas grandes guerras mundiais, a libra esterlina e o dólar contribuíram para o estoque de liquidez global.'},
+      {n:3,t:'A moeda de curso internacional deve ser capaz de desempenhar as funções de meio de liquidação das transações e dos contratos, unidade de conta e reserva de valor; assim, a confiança em uma moeda como reserva de valor pode ser medida pelo seu uso em reservas oficiais.'},
+      {n:4,t:'Uma transição para um sistema monetário internacional multipolar pressupõe a existência de sólida coordenação e de políticas estáveis entre os governos emissores das moedas de reserva.'},
+    ],answers:['C','C','C','E']},
+{id:60,session:'tarde',area:'Economia',
+ context:null,
+ instruction:'Considerando conceitos relacionados ao balanço de pagamentos bem como a sua estrutura, julgue (C ou E) os itens que se seguem.',
+ text:'Questão 60 — Balanço de Pagamentos',
+ items:[
+      {n:1,t:'A conta financeira do balanço de pagamentos, que registra todas as compras e vendas internacionais de ativos financeiros, direitos sobre recursos naturais, marcas, logotipos e domínios, contribui para a análise do movimento de capitais.'},
+      {n:2,t:'As transferências unilaterais líquidas não são consideradas parte da conta-corrente, visto que, por sua natureza, elas não são resultado da compra e venda de nenhuma mercadoria, serviço ou ativo.'},
+      {n:3,t:'Quando as importações de um país superam suas exportações, diz-se que o país tem déficit em conta-corrente; portanto, é correto concluir que, se um país compra mais dos estrangeiros do que vende a estes, ele precisará financiar a diferença por meio da aquisição de empréstimos externos.'},
+      {n:4,t:'A equação Y = C + I + G + EX - IM mostra a identidade da renda nacional para uma economia aberta, e uma análise desses agregados indica a importância da conta-corrente no dimensionamento do empréstimo internacional.'},
+    ],answers:['E','X','E','C']},
+{id:61,session:'tarde',area:'Economia',
+ context:null,
+ instruction:'Frente à crise internacional nos anos de 2007 e 2008, considerando o objetivo do Brasil de garantir a eficiência da intermediação de recursos e a promoção da estabilidade do Sistema Financeiro Nacional, julgue (C ou E) os itens subsequentes.',
+ text:'Questão 61 — Sistema Financeiro Nacional e Basileia III',
+ items:[
+      {n:1,t:'Em cumprimento às recomendações do Comitê da Basileia (Basileia III), o governo brasileiro tem buscado reduzir os requerimentos de liquidez e de alavancagem das instituições financeiras de grande porte para a melhoria da oferta de recursos.'},
+      {n:2,t:'O Sistema Financeiro Nacional deve obedecer às regras estabelecidas por colegiado composto pelo Conselho Monetário Nacional, pelo Banco Central do Brasil e pela Comissão de Valores Mobiliários.'},
+      {n:3,t:'A regulação prudencial consiste em um tipo de regulação que estabelece requisitos para as instituições financeiras com foco no gerenciamento de riscos e nos requerimentos mínimos de capital para fazer frente aos riscos decorrentes das atividades financeiras.'},
+      {n:4,t:'Todas as instituições integrantes do Sistema Financeiro Nacional são supervisionadas pelo Banco Central do Brasil.'},
+    ],answers:['E','C','E','C']},
+{id:62,session:'tarde',area:'Economia',
+ context:'Um comentarista de rádio proferiu a seguinte frase a respeito do baterista de uma banda de rock: O João não é o melhor baterista do mundo… sejamos sinceros, ele não é nem o melhor baterista da sua banda! Considerando que a habilidade musical de um membro daquela banda possa ser medida pela sua contribuição ao ganho monetário em um show e que Carlos, guitarrista da mesma banda, poderia ser o baterista da banda.',
+ instruction:'Julgue (C ou E) os itens seguintes, tendo como referência a teoria das vantagens comparativas.',
+ text:'Questão 62 — Teoria das Vantagens Comparativas',
+ items:[
+      {n:1,t:'Carlos tem vantagem comparativa em ser guitarrista.'},
+      {n:2,t:'João teria vantagem absoluta em ser guitarrista.'},
+      {n:3,t:'O custo de oportunidade relativo de João ser baterista é menor que o custo de oportunidade relativo de Carlos ser baterista.'},
+      {n:4,t:'O custo de oportunidade relativo de João ser guitarrista é menor que o custo de oportunidade relativo de Carlos ser guitarrista.'},
+    ],answers:['E','C','X','E']},
+{id:63,session:'tarde',area:'Economia',
+ context:null,
+ instruction:'Em relação à macroeconomia internacional dos fluxos de bens e de capital, julgue (C ou E) os próximos itens.',
+ text:'Questão 63 — Macroeconomia Internacional',
+ items:[
+      {n:1,t:'Na contabilização do investimento estrangeiro direto, incluem-se apenas os capitais que tenham cruzado a fronteira para que se realizasse o investimento.'},
+      {n:2,t:'Um superávit comercial produz aumento no passivo da autoridade monetária, como um banco central, por exemplo, uma vez que as reservas cambiais são incluídas na base monetária do país.'},
+      {n:3,t:'A maioria dos países em desenvolvimento tem quase nenhum fluxo de capitais, devido à falta de incentivos para investimento estrangeiro direto.'},
+      {n:4,t:'Os recursos estrangeiros que entram em um país para aplicações no mercado financeiro não são contabilizados no fluxo de capitais, por não constituírem formação bruta de capital.'},
+    ],answers:['E','E','E','E']},
+{id:64,session:'tarde',area:'Economia',
+ context:null,
+ instruction:'A respeito do Plano de Metas, implementado no governo de Juscelino Kubitschek, julgue (C ou E) os itens que se seguem.',
+ text:'Questão 64 — Plano de Metas (JK)',
+ items:[
+      {n:1,t:'Apesar de a participação do setor industrial no PIB ter aumentado significativamente entre 1955 e 1960, nem todas as atividades industriais apresentaram crescimento, a exemplo da de bens não duráveis, cuja participação no PIB diminuiu nesse período.'},
+      {n:2,t:'O financiamento do Plano de Metas por meio da emissão de títulos públicos sofreu limitações em decorrência da Lei da Usura.'},
+      {n:3,t:'Com o objetivo de aprofundar a industrialização por substituição de importações, o governo direcionou aos setores de energia e transporte a maior parte dos recursos investidos.'},
+      {n:4,t:'Dois anos após o início da implementação do Plano de Metas, foi instalada a Comissão Mista Brasil — Estados Unidos (CMBEU), com planos de investimento para setores econômicos específicos.'},
+    ],answers:['E','C','C','C']},
+{id:65,session:'tarde',area:'Economia',
+ context:'O problema mais visível da economia brasileira, na segunda metade do século XX, era a inflação, que, mesmo nos anos de fraco desempenho do PIB (1981/1983), não cedia. Já em 1980, a inflação havia superado os 100%, e os esforços realizados nos primeiros anos da década (1981 e 1982) apenas a haviam reduzido marginalmente. (F. Giambiagi et al. Economia brasileira contemporânea: 1945-2010.)',
+ instruction:'A respeito do período de hiperinflação dos anos 1980 e dos correspondentes planos de combate à inflação, julgue (C ou E) os seguintes itens.',
+ text:'Questão 65 — Hiperinflação e Planos Econômicos',
+ items:[
+      {n:1,t:'O chamado conflito distributivo se incluía entre as hipóteses levantadas para explicar a continuidade da inflação como o resultado de uma tentativa constante de apropriação de uma fatia maior da renda por cada grupo de interesse — por exemplo, trabalhadores buscavam aumentos de salários, enquanto empresários buscavam reajustar os preços de seus produtos.'},
+      {n:2,t:'Durante o Plano Cruzado, os preços foram congelados de acordo com regras para cada categoria de produtos, ao passo que os salários eram reajustados com base no gatilho inflacionário.'},
+      {n:3,t:'O Plano Verão, implementado em 1989, apresentava um misto de políticas econômicas ortodoxas e heterodoxas, além da criação de uma nova moeda em paridade com o dólar (câmbio 1:1).'},
+      {n:4,t:'O Plano Brésser, também conhecido como política do feijão com arroz, consistiu em uma política econômica ortodoxa de retorno ao ajuste gradualista de preços, cujo foco era a redução do déficit público.'},
+    ],answers:['C','C','C','E']},
+];
+
+// ═══ STATE ════════════════════════════════
+var ST = {idx:0, session:'completo', queue:[], answers:{}, comments:{}, done:[]};
+var SAVE_KEY = 'irbr_v4';
+
+function load() {
+  try {
+    var s = localStorage.getItem(SAVE_KEY);
+    if (s) Object.assign(ST, JSON.parse(s));
+  } catch(e) {}
+}
+
+var saveTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(ST));
+      flashSaved();
+    } catch(e) {
+      toast('Erro ao salvar. Verifique o armazenamento do navegador.');
+    }
+  }, 300);
+}
+
+function flashSaved() {
+  var dot = document.getElementById('save-dot');
+  var lbl = document.getElementById('save-label');
+  lbl.textContent = 'Salvo ✓';
+  dot.classList.add('show');
+  clearTimeout(dot._timer);
+  dot._timer = setTimeout(function(){ dot.classList.remove('show'); }, 1800);
+}
+
+function manualSave() {
+  closeMenu();
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(ST));
+    toast('Progresso salvo!');
+  } catch(e) {
+    toast('Erro ao salvar.');
+  }
+}
+
+// ═══ SCREENS ══════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ═══ MENU ═════════════════════════════════
+function toggleMenu() { document.getElementById('menu-overlay').classList.toggle('open'); }
+function closeMenu() { document.getElementById('menu-overlay').classList.remove('open'); }
+function overlayClick(e) { if (e.target===document.getElementById('menu-overlay')) closeMenu(); }
+
+function confirmReset() {
+  if (confirm('Apagar todo o progresso? Esta ação não pode ser desfeita.')) {
+    localStorage.removeItem(SAVE_KEY);
+    ST = {idx:0, session:'completo', queue:[], answers:{}, comments:{}, done:[]};
+    updateBar();
+    goHome();
+    toast('Progresso apagado.');
+  }
+  closeMenu();
+}
+
+function shareResult() {
+  var s = calcStats();
+  var txt = 'IRBr Simulado 2024 — ' + s.qDone + '/65 questões respondidas, ' + s.pct + ' de aproveitamento (' + s.cor + '/' + s.tot + ' itens corretos). #IRBr #Diplomacia #Itamaraty';
+  try { navigator.clipboard.writeText(txt); toast('Resultado copiado!'); }
+  catch(e) { toast('Erro ao copiar.'); }
+  closeMenu();
+}
+
+// ═══ HOME ═════════════════════════════════
+function goHome() { closeMenu(); renderHome(); showScreen('home'); }
+
+function renderHome() {
+  ['manha','tarde'].forEach(function(s) {
+    var has = ST.done.some(function(qid) {
+      return QUESTIONS.find(function(q){ return q.id===qid && q.session===s; });
+    });
+    var b = document.getElementById('badge-'+s);
+    if (b) b.style.display = has ? 'block' : 'none';
+  });
+  var wrap = document.getElementById('resume-wrap');
+  if (ST.queue.length > 0 && ST.idx < ST.queue.length) {
+    var qid = ST.queue[ST.idx];
+    var q = QUESTIONS.find(function(x){ return x.id===qid; });
+    if (q) {
+      var done = ST.done.length;
+      var total = ST.queue.length;
+      wrap.innerHTML = '<div class="resume-banner">' +
+        '<div class="rb-text"><strong>Continuar de onde parou</strong>' +
+        '<span>Q' + q.id + ' · ' + q.area + ' · ' + done + '/' + total + ' questões feitas</span></div>' +
+        '<button class="btn-resume" onclick="resumeSession()">Continuar ▶</button></div>';
+      return;
+    }
+  }
+  wrap.innerHTML = '';
+}
+
+function startSession(type) {
+  closeMenu();
+  ST.session = type;
+  if (type === 'manha') ST.queue = QUESTIONS.filter(function(q){return q.session==='manha';}).map(function(q){return q.id;});
+  else if (type === 'tarde') ST.queue = QUESTIONS.filter(function(q){return q.session==='tarde';}).map(function(q){return q.id;});
+  else ST.queue = QUESTIONS.map(function(q){return q.id;});
+  ST.idx = 0;
+  save();
+  showScreen('exam');
+  renderQ();
+}
+
+function resumeSession() { showScreen('exam'); renderQ(); }
+
+// ═══ EXAM ═════════════════════════════════
+function getQ() {
+  var qid = ST.queue[ST.idx];
+  return QUESTIONS.find(function(q){ return q.id===qid; });
+}
+
+function renderQ() {
+  var q = getQ();
+  if (!q) { showComplete(); return; }
+
+  document.getElementById('q-num').textContent = 'Q' + q.id;
+  document.getElementById('q-area').textContent = q.area;
+  document.getElementById('q-sess').textContent = q.session==='manha' ? '🌅 Manhã' : '🌇 Tarde';
+
+  var ctxEl = document.getElementById('q-ctx');
+  if (q.context) {
+    document.getElementById('q-ctx-text').textContent = q.context;
+    ctxEl.classList.add('show');
+  } else {
+    ctxEl.classList.remove('show');
+  }
+  document.getElementById('q-inst').textContent = q.instruction || '';
+  document.getElementById('q-title').textContent = q.text;
+
+  var saved = ST.answers[q.id] || {};
+  var list = document.getElementById('items-list');
+  list.innerHTML = '';
+
+  q.items.forEach(function(item, idx) {
+    var ua = saved[idx];
+    var ca = q.answers[idx];
+    var anulada = ca === 'X';
+    var row = document.createElement('div');
+    row.className = 'item-row';
+    var fb = '';
+    if (ua !== undefined) {
+      row.classList.add('answered');
+      if (anulada)      { row.classList.add('ann'); fb = '✦'; }
+      else if (ua===ca) { row.classList.add('ok');  fb = '✓'; }
+      else              { row.classList.add('err'); fb = '✗'; }
+    }
+    var spanN = document.createElement('span'); spanN.className='item-n'; spanN.textContent = item.n;
+    var spanT = document.createElement('span'); spanT.className='item-t'; spanT.textContent = item.t;
+    var btns  = document.createElement('div'); btns.className='item-btns';
+    var bC = document.createElement('button'); bC.className='btn-c'; bC.textContent='C'; bC.disabled=(ua!==undefined);
+    bC.addEventListener('click', (function(i){ return function(){ answerItem(i,'C'); }; })(idx));
+    var bE = document.createElement('button'); bE.className='btn-e'; bE.textContent='E'; bE.disabled=(ua!==undefined);
+    bE.addEventListener('click', (function(i){ return function(){ answerItem(i,'E'); }; })(idx));
+    btns.appendChild(bC); btns.appendChild(bE);
+    var spanFb = document.createElement('span'); spanFb.className='item-fb'; spanFb.textContent = fb;
+    row.appendChild(spanN); row.appendChild(spanT); row.appendChild(btns); row.appendChild(spanFb);
+    list.appendChild(row);
+  });
+
+  var fl = document.getElementById('q-flash');
+  fl.className = 'q-flash'; fl.textContent = '';
+  if (Object.keys(saved).length === q.items.length) showFlash(q);
+
+  document.getElementById('comment-box').style.display = 'none';
+  var ec = ST.comments[q.id];
+  document.getElementById('comment-ta').value = ec || '';
+  document.getElementById('comment-btn').textContent = ec ? '📝 Editar anotação…' : '💬 Adicionar anotação…';
+
+  document.getElementById('btn-prev').style.display = ST.idx > 0 ? '' : 'none';
+  document.getElementById('btn-next').textContent = ST.idx < ST.queue.length-1 ? 'Próxima →' : 'Concluir prova';
+
+  updateBar();
+  updatePbar();
+}
+
+function answerItem(idx, ans) {
+  var q = getQ();
+  if (!ST.answers[q.id]) ST.answers[q.id] = {};
+  if (ST.answers[q.id][idx] !== undefined) return;
+  ST.answers[q.id][idx] = ans;
+
+  var ca = q.answers[idx];
+  var anulada = ca === 'X';
+  var row = document.getElementById('items-list').children[idx];
+  row.classList.add('answered');
+  var fb = row.querySelector('.item-fb');
+  if (anulada)      { row.classList.add('ann'); fb.textContent='✦'; }
+  else if (ans===ca){ row.classList.add('ok');  fb.textContent='✓'; }
+  else              { row.classList.add('err'); fb.textContent='✗'; }
+  row.querySelectorAll('button').forEach(function(b){ b.disabled=true; });
+
+  var allDone = Object.keys(ST.answers[q.id]).length === q.items.length;
+  if (allDone) {
+    if (ST.done.indexOf(q.id) === -1) ST.done.push(q.id);
+    save();
+    showFlash(q);
+    updateBar();
+    setTimeout(function() {
+      if (ST.idx < ST.queue.length-1) { ST.idx++; save(); renderQ(); }
+      else showComplete();
+    }, 1500);
+  } else {
+    save();
+  }
+}
+
+function showFlash(q) {
+  var saved = ST.answers[q.id]||{}, cor=0, tot=0;
+  q.items.forEach(function(item,idx){
+    var ua = saved[idx]; if(ua===undefined) return;
+    tot++;
+    if(q.answers[idx]==='X' || ua===q.answers[idx]) cor++;
+  });
+  var pct = Math.round(cor/tot*100);
+  var fl = document.getElementById('q-flash');
+  fl.className = 'q-flash show ' + (pct===100?'perfect':pct>=50?'partial':'zero');
+  fl.textContent = pct===100 ? '✓ Perfeito! '+cor+'/'+tot+' itens corretos'
+    : pct>=50 ? '⚡ Parcialmente correto — '+cor+'/'+tot+' itens'
+    : '✗ Revise — '+cor+'/'+tot+' itens corretos';
+}
+
+function nextQ() {
+  // Mark current question done if all items answered
+  var q = getQ();
+  if (q && ST.answers[q.id] && Object.keys(ST.answers[q.id]).length === q.items.length) {
+    if (ST.done.indexOf(q.id) === -1) ST.done.push(q.id);
+  }
+  if (ST.idx < ST.queue.length-1) { ST.idx++; save(); renderQ(); }
+  else showComplete();
+}
+function prevQ() {
+  if (ST.idx > 0) { ST.idx--; renderQ(); }
+}
+
+// ═══ COMMENTS ═════════════════════════════
+function toggleComment() {
+  var b = document.getElementById('comment-box');
+  b.style.display = b.style.display==='none' ? 'block' : 'none';
+}
+function saveComment() {
+  var q = getQ(); if(!q) return;
+  var text = document.getElementById('comment-ta').value.trim();
+  if (text) {
+    ST.comments[q.id] = text;
+    save();
+    document.getElementById('comment-box').style.display = 'none';
+    document.getElementById('comment-btn').textContent = '📝 Editar anotação…';
+    toast('Anotação salva!');
+  }
+}
+
+// ═══ STATS ════════════════════════════════
+function calcStats() {
+  var cor=0, tot=0, qDone=0;
+  // Count ALL questions that have at least one answer
+  Object.keys(ST.answers).forEach(function(qid) {
+    var q = QUESTIONS.find(function(x){ return x.id===parseInt(qid); });
+    if (!q) return;
+    var sa = ST.answers[qid] || {};
+    var itemsAnswered = Object.keys(sa).length;
+    if (itemsAnswered === 0) return;
+    if (itemsAnswered === q.items.length) qDone++;
+    q.items.forEach(function(item, idx) {
+      var ua = sa[idx]; if (ua===undefined) return;
+      tot++;
+      if (q.answers[idx]==='X' || ua===q.answers[idx]) cor++;
+    });
+  });
+  return {cor:cor, tot:tot, pct:tot>0?Math.round(cor/tot*100)+'%':'–', qDone:qDone};
+}
+
+function updateBar() {
+  var s = calcStats();
+  // s-ans = total questions with at least 1 answer
+  var qTouched = Object.keys(ST.answers).filter(function(qid) {
+    return Object.keys(ST.answers[qid]).length > 0;
+  }).length;
+  document.getElementById('s-ans').textContent = qTouched;
+  document.getElementById('s-cor').textContent = s.cor;
+  document.getElementById('s-pct').textContent = s.pct;
+}
+function updatePbar() {
+  document.getElementById('pbar').style.width = (ST.queue.length>0 ? ST.idx/ST.queue.length*100 : 0)+'%';
+}
+
+// ═══ COMPLETE ═════════════════════════════
+function showComplete() {
+  var cor=0, tot=0;
+  ST.queue.forEach(function(qid) {
+    var q=QUESTIONS.find(function(x){return x.id===qid;}); if(!q) return;
+    var sa=ST.answers[qid]||{};
+    q.items.forEach(function(item,idx){
+      var ua=sa[idx]; if(ua===undefined) return;
+      tot++; if(q.answers[idx]==='X'||ua===q.answers[idx]) cor++;
+    });
+  });
+  var pct = tot>0?Math.round(cor/tot*100):0;
+  document.getElementById('c-score').textContent = pct+'%';
+  document.getElementById('c-msg').textContent = cor+' de '+tot+' itens corretos na sessão.';
+  showScreen('complete');
+}
+
+// ═══ DASH ═════════════════════════════════
+function goDash() { closeMenu(); renderDash(); showScreen('dash'); }
+
+function renderDash() {
+  var areas = {};
+  Object.keys(ST.answers).forEach(function(qid) {
+    var q=QUESTIONS.find(function(x){return x.id===parseInt(qid);}); if(!q) return;
+    if(!areas[q.area]) areas[q.area]={cor:0,tot:0};
+    var sa=ST.answers[qid]||{};
+    q.items.forEach(function(item,idx){
+      var ua=sa[idx]; if(ua===undefined) return;
+      areas[q.area].tot++;
+      if(q.answers[idx]==='X'||ua===q.answers[idx]) areas[q.area].cor++;
+    });
+  });
+  var s = calcStats();
+  document.getElementById('kpi-row').innerHTML =
+    kpi(s.pct,'Aproveitamento geral') + kpi(s.cor,'Itens corretos') +
+    kpi(s.tot,'Itens respondidos') + kpi(s.qDone+'/65','Questões feitas') +
+    kpi(Object.keys(ST.comments).length,'Anotações');
+
+  var ag = document.getElementById('area-grid');
+  var ae = Object.entries(areas);
+  if (!ae.length) {
+    ag.innerHTML = '<p style="color:var(--muted);font-size:.88rem">Responda questões para ver estatísticas por área.</p>';
+  } else {
+    ae.sort(function(a,b){ return (b[1].cor/b[1].tot)-(a[1].cor/a[1].tot); });
+    ag.innerHTML = ae.map(function(e) {
+      var n=e[0],st=e[1],p=Math.round(st.cor/st.tot*100),c=p>=70?'good':p<50?'bad':'';
+      return '<div class="area-card"><div class="area-name">'+n+'</div>'+
+        '<div class="bar-wrap"><div class="bar '+c+'" style="width:'+p+'%"></div></div>'+
+        '<div class="area-stats"><span>'+p+'%</span><span>'+st.cor+'/'+st.tot+' itens</span></div></div>';
+    }).join('');
+  }
+
+  var ins = document.getElementById('insights');
+  if (!ae.length) {
+    ins.innerHTML = '<p style="color:var(--muted)">Responda mais questões para ver análise.</p>';
+  } else {
+    var best=ae[0], worst=ae[ae.length-1];
+    var pctN = parseInt(s.pct);
+    ins.innerHTML =
+      insight('🌟','Melhor área: '+best[0], Math.round(best[1].cor/best[1].tot*100)+'% de aproveitamento. Continue assim!') +
+      insight('🎯','Área a melhorar: '+worst[0], Math.round(worst[1].cor/worst[1].tot*100)+'% de aproveitamento. Foque nesta área nos próximos estudos.') +
+      (pctN>0 && pctN<50 ? insight('⚠️','Aproveitamento abaixo de 50%','Revise os fundamentos antes de avançar para questões mais difíceis.') : '') +
+      (pctN>=70 ? insight('🏆','Bom aproveitamento!','Você está acima de 70%. Homogeneize o desempenho entre as áreas.') : '');
+  }
+
+  document.getElementById('study-recs').innerHTML =
+    '<div class="study-box"><h3>📚 Recomendações por Disciplina</h3><ul>' +
+    '<li><b>Língua Portuguesa:</b> leia textos literários e jornalísticos diariamente; pratique análise sintática e semântica.</li>' +
+    '<li><b>Língua Inglesa:</b> leia The Economist e Financial Times; foque em inferência e vocabulário contextual.</li>' +
+    '<li><b>História do Brasil:</b> estude cronologicamente; conecte eventos políticos e econômicos com linhas do tempo.</li>' +
+    '<li><b>História Mundial:</b> leia Hobsbawm (Era das Revoluções, Era do Capital, Era dos Extremos).</li>' +
+    '<li><b>Política Internacional:</b> acompanhe a agenda do MRE; leia Vizentini e notas do Itamaraty.</li>' +
+    '<li><b>Geografia:</b> domine Mackinder, Spykman e Ratzel; combine teoria com eventos atuais.</li>' +
+    '<li><b>Direito:</b> domine a Carta da ONU, Convenção de Viena (1961) e o Estatuto de Roma; leia decisões da CIJ.</li>' +
+    '<li><b>Economia:</b> revise Mankiw (Macroeconomia), balanço de pagamentos e história econômica brasileira.</li>' +
+    '</ul></div>' +
+    '<div class="study-box" style="margin-top:10px"><h3>🗓️ Estratégia de Revisão</h3><ul>' +
+    '<li>Repita questões erradas ao menos 3 vezes em dias diferentes (spaced repetition).</li>' +
+    '<li>Para cada item errado, use as anotações para registrar o motivo do erro.</li>' +
+    '<li>Priorize áreas com aproveitamento abaixo de 50% antes das próximas sessões.</li>' +
+    '<li>Reserve as últimas 2 semanas antes da prova para revisão e simulados cronometrados.</li>' +
+    '</ul></div>';
+}
+
+function kpi(v,l) { return '<div class="kpi"><div class="kpi-val">'+v+'</div><div class="kpi-lbl">'+l+'</div></div>'; }
+function insight(ico,title,desc) {
+  return '<div class="insight-card"><div class="ic-icon">'+ico+'</div><div class="ic-body"><strong>'+title+'</strong><p>'+desc+'</p></div></div>';
+}
+
+// ═══ COMMENTS SCREEN ══════════════════════
+function goComments() {
+  closeMenu();
+  var entries = Object.entries(ST.comments);
+  var list = document.getElementById('comments-list');
+  if (!entries.length) {
+    list.innerHTML = '<div class="no-comments">Nenhuma anotação salva ainda.<br>Adicione comentários durante a prova.</div>';
+  } else {
+    list.innerHTML = entries.map(function(e) {
+      var qid=parseInt(e[0]), text=e[1];
+      var q = QUESTIONS.find(function(x){return x.id===qid;});
+      return '<div class="comment-item">'+
+        '<div class="ci-q">Q'+qid+' — '+(q?q.area:'')+'</div>'+
+        '<div class="ci-meta">'+(q?q.text:'')+'</div>'+
+        '<div class="ci-text">'+text+'</div></div>';
+    }).join('');
+  }
+  showScreen('comments-screen');
+}
+
+// ═══ TOAST ════════════════════════════════
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// ═══ INIT ═════════════════════════════════
+load();
+updateBar();
+renderHome();
+</script>
+</body>
+</html>
